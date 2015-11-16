@@ -1,0 +1,104 @@
+.dropdown-menu.extendopup li a {
+    width: 100%;
+    display: inline-block;
+}
+
+.dropdown-menu.extendopup li a:hover {
+    background-color: #F7F8F9 !important;
+    color: #2E2E2E;
+}
+
+.chat-form {
+    margin-top : 10px;
+}
+
+.chat-room {
+    height: 890px;
+}
+
+.chat-room .left-side {
+    width: 15%;
+}
+
+.chat-room .mid-side {
+    width: 70%;
+}
+
+
+.chat-room .right-side {
+    width: 15%;
+}
+
+.chat-room .left-side .footer {
+     background: #d5d7de;
+     border-radius: 0 0 0 4px;
+     /*-webkit-border-radius: 0 0 0 4px;*/
+     padding: 15px;
+     height: 70px;
+     width: 100%;
+     position: absolute;
+     bottom: 0;
+ }
+
+.chat-room .mid-side .message-list {
+     height: 650px;
+     overflow-y:auto;
+     padding-left: 30px;
+     padding-right: 30px;
+ }
+
+.chat-room .mid-side .footer {
+     background: #f6f6f6;
+     padding-bottom: 1px;
+     width: 100%;
+     height: 130px;
+     position: absolute;
+     bottom: 0;
+     border-right: 1px solid #E5E8EF;
+ }
+
+.chat-room .right-side .footer {
+     background: #fff;
+     padding: 15px;
+     height: 70px;
+     position: absolute;
+     bottom: 0;
+     width: 100%;
+     border-top: 1px solid #E5E8EF;
+     border-radius: 0 0 4px 0;
+     -webkit-border-radius: 0 0 4px 0;
+ }
+
+.chat-room .left-side .footer .chat-avatar img {
+     width: 40px;
+     height: 40px;
+     border: 2px solid #fff;
+     float: left;
+ }
+
+.chat-room .left-side .footer .user-status {
+     float: left;
+     margin: 10px;
+ }
+
+.chat-room .left-side .footer .user-status i {
+     padding-right: 5px;
+ }
+
+.chat-room .left-side .footer a.chat-dropdown {
+     background: #96979a;
+     border-radius: 2px;
+     color: #fff;
+     font-size: 10px;
+     margin-top: 10px;
+     padding: 3px 5px;
+}
+
+.chat-txt {
+    width: 100%;
+
+}
+
+.registration1 {
+    padding-bottom: 10px;
+}
