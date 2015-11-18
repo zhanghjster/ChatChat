@@ -1,7 +1,6 @@
 /**
  * Created by ben on 15/11/15.
  */
-import auth from '../utils/auth.js';
 
 function authCheck(nextState, replaceState) {
     // used to do redirect anywhere you want
@@ -45,9 +44,12 @@ export default {
                 })
             }
         },
-        {onEnter: authCheck},
         { path: '/',
-            onEnter: authCheck,
+            getComponent: (location, cb) => {
+                require.ensure([], (require) => {
+                    cb(null, require('componets/Default'))
+                })
+            },
         }
     ]
 }

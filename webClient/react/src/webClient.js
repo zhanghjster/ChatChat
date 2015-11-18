@@ -1,23 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router'
-import routes from './config/routes.js';
-import history from './utils/history.js';
+import {Provider} from 'react-redux';
+import {ReduxRouter} from 'redux-router';
 
-import Dispatcher from 'flux';
+import routes from './routes';
 
 class APP extends React.Component {
-  getInitialState() {
-    return { }
-  }
 
-  render() {
-    return <div>{this.pops.children}</div>;
+  static propTypes = {
+      store: React.PropTypes.object.isRequired
+  };
+
+  render () {
+    return
+        <Provider store={store}
+            <ReduxRouter>
+                {routes}
+            </ReducRouter>
+        </Provider>
+      ;
   }
 }
 
-ReactDOM.render(
-    <Router routes={routes} history={history} />,
-    document.getElementById("APP")
-);
+ReactDOM.render(<APP/>, document.getElementById("APP"));
 
