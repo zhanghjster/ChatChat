@@ -1,6 +1,10 @@
 ChatChat
 --------
+
+Project for my learning
+
 ### Setup DEV ###
+
 
 1. Setup Docker (Max OS x)
 
