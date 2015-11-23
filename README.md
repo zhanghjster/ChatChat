@@ -1,12 +1,12 @@
 ChatChat
 --------
 
-Project for my learning
+Project for my learning stuff
 
 ### Setup DEV ###
 
 
-1. Setup Docker (Max OS x)
+1. Setup Docker (Max OS X)
 
 	1. Follow the instructions at http://docs.docker.com/installation/mac/
 	2. Start a docker host by `Docker Quick Start Terminal`
