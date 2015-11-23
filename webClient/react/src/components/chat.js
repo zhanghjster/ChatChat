@@ -1,18 +1,12 @@
-/**
- * Created by ben on 15/11/15.
- */
+/** Created by ben on 15/11/18. **/
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import AppDispatcher from '../dispatcher/appDispatcher.js';
+import { Link } from 'react-router';
+import {pushState} from 'redux-router';
 
-export default class Chat extends React.Component {
-
+export default class Home extends React.Component {
     render() {
-
-        return (
-            <div>
-               Hello, chat
-            </div>
-        );
+        return <div>Chat page</div>;
     }
 }

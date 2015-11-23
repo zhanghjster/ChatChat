@@ -6,5 +6,7 @@ export default createConstants(
     'LOGIN_REQUEST',
     'LOGIN_SUCCESS',
     'LOGIN_FAIL',
-    'LOGOUT'
+    'LOGOUT',
+    'SIGNUP_REQUEST',
+    'SIGNUP_FAIL'
 )

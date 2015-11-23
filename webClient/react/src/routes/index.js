@@ -1,55 +1,100 @@
 /**
  * Created by ben on 15/11/15.
  */
+import React from 'react';
+import {connect} from 'react-redux';
+import { Router, Route, IndexRoute } from 'react-router';
+import history from '../utils/history.js';
 
-function authCheck(nextState, replaceState) {
-    // used to do redirect anywhere you want
-    //history.replaceState(null, '/login');
+function requireAuth(Component) {
 
-    if (!auth.loggedIn()) {
-        replaceState({
-            nextPathname: nextState.location.pathname
-        }, '/login')
-    } else {
-        replaceState({
-            nextPathname: nextState.location.pathname
-        }, '/signup')
+    class AuthenticatedComponent extends React.Component {
+
+        componentWillMount () {
+            this.checkAuth();
+        }
+
+        componentWillReceiveProps (nextProps) {
+            this.checkAuth();
+        }
+
+        checkAuth () {
+            if (!this.props.auth.isAuthenticated) {
+                history.pushState(null, '/login');
+            } else {
+                history.pushState(null, '/chat');
+            }
+        }
+
+        render () {
+            return (
+                <div>
+                    {this.props.isAuthenticated === true
+                        ? <Component {...this.props}/>
+                        : null
+                    }
+                </div>
+            )
+        }
     }
 
-}
-export default {
-    componet: APP,
-    childRoutes: [
-        {
-            path: '/login',
-            getComponent: (location, cb) => {
-                require.ensure([], (require) => {
-                    cb(null, require('components/Login'))
-                })
-            }
-        },
-        { path: '/signup',
-            getComponent: (location, cb) => {
-                require.ensure([], (require) => {
-                    cb(null, require('components/Signup'))
-                })
-            }
-        },
+    const mapStateToProps = (state) => {
+        return { auth: state.auth }
+    }
 
-        { path: '/chat',
-            onEnter: authCheck,
-            getComponent: (location, cb) => {
-                require.ensure([], (require) => {
-                    cb(null, require('components/Chat'))
-                })
-            }
-        },
-        { path: '/',
-            getComponent: (location, cb) => {
-                require.ensure([], (require) => {
-                    cb(null, require('componets/Default'))
-                })
-            },
-        }
-    ]
+    return connect(mapStateToProps)(AuthenticatedComponent);
 }
+
+const routeConfig = [
+    {
+        componet: require('../components/APP'),
+        childRoutes: [
+            {
+                path: '/login',
+                getComponent: (location, cb) => {
+                    require.ensure([], (require) => {
+                        cb(null, require('components/Login'))
+                    })
+                }
+            },
+            { path: '/signup',
+                getComponent: (location, cb) => {
+                    require.ensure([], (require) => {
+                        cb(null, require('components/Signup'))
+                    })
+                }
+            },
+            { path: '/chat',
+                getComponent: (location, cb) => {
+                    require.ensure([], (require) => {
+                        cb(null, require('components/Chat'))
+                    })
+                }
+            },
+            { path: '/',
+                getComponent: (location, cb) => {
+                    require.ensure([], (require) => {
+                        cb(null, requireAuth(require('components/Home')))
+                    })
+                }
+            }
+        ]
+    }
+];
+
+export default (
+    <Router routes={routeConfig} history={history}/>
+);
+
+/*
+export default(
+    <Router history={history}>
+        <Route path='/' component={APP}>
+            <IndexRoute component={Home}/>
+            <Route path="login" component={Login}/>
+            <Route path="signup" component={Signup}/>
+            <Route path="chat" component={Chat}/>
+        </Route>
+    </Router>
+);
+*/

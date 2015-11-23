@@ -3,6 +3,7 @@ import (
 	"time"
 	"log"
 	"github.com/garyburd/redigo/redis"
+	"strconv"
 )
 
 type User struct {
@@ -13,9 +14,19 @@ type User struct {
 	Status int `redis:"status"`
 }
 
-func CreateUser(username, password string) bool {
+func CreateUser(username, password string) (bool, error) {
 	db := rdbPool.Get()
 	defer  db.Close()
+
+	// generate user id
+	next_user_id, err := db.INCRBY(gen_key(USER_NEXT_ID_PRE, ""), 1)
+
+	if err != nil {
+		return false, err
+	}
+
+	// set user id2username map
+	db.SET(gen_key(USER_ID2NAME_PRE, strconv.FormatInt(next_user_id, 10)), username)
 
 	// save user info to redis
 	db.HMSET(
@@ -25,7 +36,7 @@ func CreateUser(username, password string) bool {
 		"reg_time", time.Now().Unix(),
 	)
 
-	return true
+	return true, nil
 }
 
 func getUserByName(username string) (bool, *User) {

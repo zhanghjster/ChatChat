@@ -3,7 +3,10 @@ package main
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/garyburd/redigo/redis"
+	"fmt"
+	"strconv"
 )
 
 var testDBpool = NewRDBpool("dockerhost:6379")
@@ -58,4 +61,16 @@ func TestSETandGET(t *testing.T)  {
 
 	//db.DEL("benben")
 
+}
+
+func TestINCRYBY(t *testing.T) {
+	db := testDBpool.Get()
+	defer  db.Close()
+
+	next_id, err := db.INCRBY("test_next_id", 1)
+
+	assert.Nil(t, err)
+
+	fmt.Println(next_id)
+	fmt.Println(strconv.FormatInt(132333, 10))
 }

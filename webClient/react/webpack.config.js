@@ -32,5 +32,11 @@ module.exports = {
             { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader"}
         ]
     },
-    plugins: [envPlugin, commonsPlugin]
+    plugins: [
+        envPlugin,
+        commonsPlugin,
+        new webpack.ProvidePlugin({
+            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+        })
+    ]
 }

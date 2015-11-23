@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	SESSION_CACHE_PRE = "session:"
-	USER_CACHE_PRE = "user:"
+	SESSION_CACHE_PRE = "CCsession:"
+	USER_CACHE_PRE = "CCuser:"
+	USER_ID2NAME_PRE = "CCuserid:"
+	USER_NEXT_ID_PRE = "CCnext_user_id"
 )
 
 type RDBpool struct {
@@ -44,6 +46,9 @@ func NewRDBpool(address string) *RDBpool {
 }
 
 func gen_key(pre, id string) string {
+	if id == "" {
+		return pre
+	}
 	return pre + id
 }
 
@@ -56,6 +61,12 @@ func (p *RDBpool) Get() *RDB {
 // Close the pool
 func (p *RDBpool) Close() {
 	p.pool.Close()
+}
+
+// INCRBY
+func (db *RDB) INCRBY(k string, i int) (int64, error) {
+	n, err := db.conn.Do("INCRBY", k, i)
+	return n.(int64), err
 }
 
 // DEL key

@@ -54,6 +54,8 @@ func (sm *SessionManager) InitSession(sid, username string) *Session {
 func (sm *SessionManager) StartSession(w http.ResponseWriter, username string) *Session {
 	sid := sm.NewSessionID();
 	session := sessionManager.InitSession(sid, username)
+
+
 	cookie := http.Cookie{
 		Name: sessionManager.sessionName,
 		Value: url.QueryEscape(sid + "-" + username),

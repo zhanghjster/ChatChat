@@ -3,18 +3,25 @@
  */
 import {applyMiddleware, compose, createStore} from 'redux';
 import thunk from 'redux-thunk';
-import {reduxCreateRouter} from 'redux-router';
 import routes from '../routes';
-import createHistory from 'history/lib/createBrowserHistory';
-import createLogger from 'redux-logger';
-import rootReducer from '../reducers';
+import rootReducer from '../reducers'
 
 export default function configureStore(initialState) {
 
-    let ceateStoreWithMiddleware = compose(
-        applyMiddleware(thunk, createLogger),
-        reduxReactRouter({routes, createHistory})
-    );
+    let ceateStoreWithMiddleware;
+
+    if (__DEV__ || true) {
+        const { persistState, devTools } = require('redux-devtools');
+        ceateStoreWithMiddleware = compose(
+            applyMiddleware(thunk),
+            devTools(),
+            persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
+        );
+    } else {
+        ceateStoreWithMiddleware = compose(
+            applyMiddleware(thunk, createLogger)
+        );
+    }
 
     const store = ceateStoreWithMiddleware(createStore)(rootReducer, initialState);
 
