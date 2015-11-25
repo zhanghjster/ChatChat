@@ -5,18 +5,22 @@ import (
 )
 
 func main() {
-	HttpServer := NewHTTPServer(3000)
+	HttpServer := NewHTTPServer(configure.Http.Port)
 	HttpServer.Serve();
 }
 
 var (
+	configure *Configure
 	rdbPool *RDBpool
 	sessionManager *SessionManager
 	upgrader websocket.Upgrader
 )
 
 func init() {
-	rdbPool = NewRDBpool("dockerhost:6379")
+
+	configure = LoadConfigure("../conf/server.cfg")
+
+	rdbPool = NewRDBpool(configure.Redis.Host)
 	sessionManager, _ = NewSessionManager("chatchat", 100000)
 
 	upgrader = websocket.Upgrader{
