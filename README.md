@@ -27,3 +27,7 @@ Module not found: Error: Cannot resolve module 'components/Login' in /home/chyll
  @ ./config/routes.js 36:25-52
  npm WARN install Couldn't install optional dependency: Unsupported
 
+Benx(23881302) 17:46:58 
+webclient 那里是react + react-router + redux, 用webpack打包编译
+Benx(23881302) 17:47:08 
+server那里是 go-gin
