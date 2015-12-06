@@ -1,4 +1,4 @@
-* how to build
+# how to build
 ```
 go get github.com/gorilla/websocket
 go get github.com/garyburd/redigo/redis
