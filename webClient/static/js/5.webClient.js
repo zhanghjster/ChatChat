@@ -1,13 +1,11 @@
 webpackJsonp([5],{
 
-/***/ 280:
+/***/ 268:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Created by Ben on 15/11/20.
+	 * Created by ben on 15/11/15.
 	 */
-	/** Created by ben on 15/11/18. **/
-
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
@@ -28,26 +26,96 @@ webpackJsonp([5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var Home = (function (_React$Component) {
-	    _inherits(Home, _React$Component);
+	var _reactDom = __webpack_require__(221);
 
-	    function Home() {
-	        _classCallCheck(this, Home);
+	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	        _get(Object.getPrototypeOf(Home.prototype), 'constructor', this).apply(this, arguments);
+	var _reactRedux = __webpack_require__(222);
+
+	var _actions = __webpack_require__(264);
+
+	var Signup = (function (_React$Component) {
+	    _inherits(Signup, _React$Component);
+
+	    function Signup() {
+	        _classCallCheck(this, Signup);
+
+	        _get(Object.getPrototypeOf(Signup.prototype), 'constructor', this).apply(this, arguments);
 	    }
 
-	    _createClass(Home, [{
+	    _createClass(Signup, [{
+	        key: 'doSignup',
+	        value: function doSignup() {
+	            var username = this.refs.username.value;
+	            var password = this.refs.password.value;
+	            this.props.dispatch((0, _actions.signup)(username, password));
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
-	            return _react2['default'].createElement('div', null);
+	            var error = null;
+	            if (this.props.signupError != null) {
+	                error = _react2['default'].createElement(
+	                    'div',
+	                    { className: 'form-group has-error' },
+	                    _react2['default'].createElement(
+	                        'p',
+	                        { className: 'help-block' },
+	                        this.props.signupError
+	                    )
+	                );
+	            }
+	            return _react2['default'].createElement(
+	                'div',
+	                { className: 'container login-body' },
+	                _react2['default'].createElement(
+	                    'form',
+	                    { className: 'form-signin' },
+	                    _react2['default'].createElement(
+	                        'h2',
+	                        { className: 'form-signin-heading' },
+	                        'ChatChat'
+	                    ),
+	                    _react2['default'].createElement(
+	                        'div',
+	                        { className: 'login-wrap' },
+	                        error,
+	                        _react2['default'].createElement('input', { type: 'text',
+	                            className: 'form-control',
+	                            placeholder: 'UserName',
+	                            ref: 'username',
+	                            autofocus: true,
+	                            name: 'username' }),
+	                        _react2['default'].createElement('input', { type: 'password',
+	                            className: 'form-control',
+	                            placeholder: 'Password',
+	                            ref: 'password',
+	                            name: 'password' }),
+	                        _react2['default'].createElement(
+	                            'button',
+	                            {
+	                                className: 'btn btn-lg btn-login btn-block btn-danger btn-shadow',
+	                                type: 'button',
+	                                onClick: this.doSignup.bind(this)
+	                            },
+	                            'Sign Up'
+	                        )
+	                    )
+	                )
+	            );
 	        }
 	    }]);
 
-	    return Home;
+	    return Signup;
 	})(_react2['default'].Component);
 
-	exports['default'] = Home;
+	var mapStateToProp = function mapStateToProp(state) {
+	    return {
+	        'signupError': state.auth.signupError
+	    };
+	};
+
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProp)(Signup);
 	module.exports = exports['default'];
 
 /***/ }

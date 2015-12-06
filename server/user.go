@@ -1,7 +1,6 @@
 package main
 import (
 	"time"
-	"log"
 	"github.com/garyburd/redigo/redis"
 	"strconv"
 )
@@ -9,60 +8,112 @@ import (
 type User struct {
 	Username string `redis:"username"`
 	Password string `redis:"password"`
-	Reg_time int    `redis:"reg_time"`
-	Last_activity_time int `redis:"last_activity_time"`
+	RegTime int    `redis:"regTime"`
+	LastActivityTime int `redis:"lastActivityTime"`
 	Status int `redis:"status"`
 }
 
-func CreateUser(username, password string) (bool, error) {
+func createUser(username, password string) (int, error) {
 	db := rdbPool.Get()
 	defer  db.Close()
 
 	// generate user id
-	next_user_id, err := db.INCRBY(gen_key(USER_NEXT_ID_PRE, ""), 1)
+	nextUserID, err := db.INCRBY(genRedisKey(USER_NEXT_ID_PRE, ""), 1)
 
 	if err != nil {
-		return false, err
+		return 0, err
 	}
 
-	// set user id2username map
-	db.SET(gen_key(USER_ID2NAME_PRE, strconv.FormatInt(next_user_id, 10)), username)
+	// set user name2id index
+	db.SET(genRedisKey(USER_NAME2ID_PRE, username), nextUserID)
 
 	// save user info to redis
 	db.HMSET(
-		gen_key(USER_CACHE_PRE, username),
+		genRedisKey(USER_CACHE_PRE, strconv.FormatInt(nextUserID, 10)),
 		"username", username,
 		"password", password,
-		"reg_time", time.Now().Unix(),
+		"regTime", time.Now().Unix(),
 	)
 
-	return true, nil
+	return int(nextUserID), nil
 }
 
 func getUserByName(username string) (bool, *User) {
+	userID, _ := usernameToID(username);
+	return getUserByID(userID)
+}
+
+func usernameToID(username string) (int, error) {
+	db := rdbPool.Get()
+	defer  db.Close()
+
+	return redis.Int(db.GET(genRedisKey(USER_NAME2ID_PRE, username)));
+}
+
+func getUserByID(userID int) (bool, *User) {
 	db := rdbPool.Get()
 	defer  db.Close()
 
 	user := &User{}
 
-	log.Print(gen_key(USER_CACHE_PRE, username))
+	db.HGETALL(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), user)
+	return true, user
+}
 
-	exists, _ := db.HGETALL(gen_key(USER_CACHE_PRE, username), user);
+func getUsername(userID int) (string, error)  {
+	db := rdbPool.Get()
+	defer  db.Close()
 
-	return exists, user
+	username, err := redis.String(db.HGET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "username"))
+	if err != nil {
+		return "", err
+	}
+
+	return username, nil
+}
+
+func gerUserStatus(userID int) (string, error)  {
+	db := rdbPool.Get()
+	defer  db.Close()
+
+	status, err := redis.String(db.HGET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "status"))
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
+}
+
+func setUserStatus(userID int, status string) error {
+	db := rdbPool.Get()
+	defer  db.Close()
+
+	return db.HMSET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "status", status)
 }
 
 func usernameExists(username string) bool {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	exists, _ := db.EXISTS(gen_key(USER_CACHE_PRE, username));
+	exists, _ := db.EXISTS(genRedisKey(USER_NAME2ID_PRE, username));
 	return exists
+}
+
+func userExist(userID int) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	exists, err := db.EXISTS(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)));
+	return exists, err
 }
 
 func getUserPassword(username string) string {
 	db := rdbPool.Get()
 	defer  db.Close()
-	password, _ := redis.String(db.HGET(gen_key(USER_CACHE_PRE, username), "password"))
+
+	// get user id by name
+	userID, _ := redis.Int(db.GET(genRedisKey(USER_NAME2ID_PRE, username)));
+
+	password, _ := redis.String(db.HGET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "password"))
 	return password
 }

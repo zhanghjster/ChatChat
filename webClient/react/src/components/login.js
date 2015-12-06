@@ -2,7 +2,6 @@
  * Created by ben on 15/11/8.
  */
 import React from 'react';
-import classNames from 'classnames';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';

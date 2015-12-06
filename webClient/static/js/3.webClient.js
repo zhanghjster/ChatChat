@@ -1,10 +1,10 @@
 webpackJsonp([3],{
 
-/***/ 278:
+/***/ 263:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Created by ben on 15/11/15.
+	 * Created by ben on 15/11/8.
 	 */
 	'use strict';
 
@@ -26,45 +26,52 @@ webpackJsonp([3],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(216);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRedux = __webpack_require__(217);
+	var _reactRouter = __webpack_require__(158);
 
-	var _actions = __webpack_require__(274);
+	var _reactRedux = __webpack_require__(222);
 
-	var Signup = (function (_React$Component) {
-	    _inherits(Signup, _React$Component);
+	var _actions = __webpack_require__(264);
 
-	    function Signup() {
-	        _classCallCheck(this, Signup);
+	var Login = (function (_React$Component) {
+	    _inherits(Login, _React$Component);
 
-	        _get(Object.getPrototypeOf(Signup.prototype), 'constructor', this).apply(this, arguments);
+	    function Login() {
+	        _classCallCheck(this, Login);
+
+	        _get(Object.getPrototypeOf(Login.prototype), 'constructor', this).apply(this, arguments);
 	    }
 
-	    _createClass(Signup, [{
-	        key: 'doSignup',
-	        value: function doSignup() {
+	    _createClass(Login, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this._showError();
+	        }
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {
+	            this._showError();
+	        }
+	    }, {
+	        key: '_showError',
+	        value: function _showError() {
+	            if (this.props.loginError != null) {
+	                this.refs.password.focus();
+	            }
+	        }
+	    }, {
+	        key: 'doLogin',
+	        value: function doLogin() {
 	            var username = this.refs.username.value;
 	            var password = this.refs.password.value;
-	            this.props.dispatch((0, _actions.signup)(username, password));
+	            this.props.dispatch((0, _actions.login)(username, password));
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var error = null;
-	            if (this.props.signupError != null) {
-	                error = _react2['default'].createElement(
-	                    'div',
-	                    { className: 'form-group has-error' },
-	                    _react2['default'].createElement(
-	                        'p',
-	                        { className: 'help-block' },
-	                        this.props.signupError
-	                    )
-	                );
-	            }
 	            return _react2['default'].createElement(
 	                'div',
 	                { className: 'container login-body' },
@@ -79,26 +86,49 @@ webpackJsonp([3],{
 	                    _react2['default'].createElement(
 	                        'div',
 	                        { className: 'login-wrap' },
-	                        error,
-	                        _react2['default'].createElement('input', { type: 'text',
-	                            className: 'form-control',
-	                            placeholder: 'UserName',
-	                            ref: 'username',
-	                            autofocus: true,
-	                            name: 'username' }),
-	                        _react2['default'].createElement('input', { type: 'password',
-	                            className: 'form-control',
-	                            placeholder: 'Password',
-	                            ref: 'password',
-	                            name: 'password' }),
+	                        _react2['default'].createElement(
+	                            'div',
+	                            { className: 'form-group' },
+	                            _react2['default'].createElement('input', { ref: 'username',
+	                                type: 'text',
+	                                className: 'form-control',
+	                                placeholder: 'UserName',
+	                                autofocus: true,
+	                                name: 'username' })
+	                        ),
+	                        _react2['default'].createElement(
+	                            'div',
+	                            { className: this.props.loginError == null ? 'form-group' : 'form-group has-error' },
+	                            _react2['default'].createElement('input', { ref: 'password',
+	                                type: 'password',
+	                                className: 'form-control',
+	                                placeholder: 'Password',
+	                                name: 'password' })
+	                        ),
 	                        _react2['default'].createElement(
 	                            'button',
-	                            {
-	                                className: 'btn btn-lg btn-login btn-block btn-danger btn-shadow',
+	                            { className: 'btn btn-lg btn-login btn-block btn-danger btn-shadow',
 	                                type: 'button',
-	                                onClick: this.doSignup.bind(this)
-	                            },
-	                            'Sign Up'
+	                                onClick: this.doLogin.bind(this) },
+	                            'Sign in'
+	                        ),
+	                        _react2['default'].createElement(
+	                            'div',
+	                            { className: 'registration' },
+	                            _react2['default'].createElement(
+	                                _reactRouter.Link,
+	                                { to: '/signup' },
+	                                'Create an account'
+	                            ),
+	                            _react2['default'].createElement(
+	                                'span',
+	                                { className: 'pull-right' },
+	                                _react2['default'].createElement(
+	                                    'a',
+	                                    { 'data-toggle': 'modal', href: '#' },
+	                                    ' Forgot Password?'
+	                                )
+	                            )
 	                        )
 	                    )
 	                )
@@ -106,16 +136,16 @@ webpackJsonp([3],{
 	        }
 	    }]);
 
-	    return Signup;
+	    return Login;
 	})(_react2['default'].Component);
 
 	var mapStateToProp = function mapStateToProp(state) {
 	    return {
-	        'signupError': state.auth.signupError
+	        'loginError': state.auth.loginError
 	    };
 	};
 
-	exports['default'] = (0, _reactRedux.connect)(mapStateToProp)(Signup);
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProp)(Login);
 	module.exports = exports['default'];
 
 /***/ }
