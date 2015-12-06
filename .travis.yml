@@ -1,0 +1,16 @@
+language: go
+go: 
+ - 1.5.2
+ - release
+
+install:
+  - go get github.com/gorilla/websocket
+  - go get github.com/garyburd/redigo/redis
+  - go get github.com/dgrijalva/jwt-go
+  - go get github.com/gin-gonic/gin
+  - git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
+
+script:
+ - cd server
+ - go build
+ 
