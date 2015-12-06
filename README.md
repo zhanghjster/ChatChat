@@ -1,18 +1,12 @@
 # how to build
 ```
+export GOPATH=~/go #设置GOPATH为合适的值
 go get github.com/gorilla/websocket
 go get github.com/garyburd/redigo/redis
 go get github.com/dgrijalva/jwt-go
-```
-
-src下
-```
-mkdir -p golang.org/x/
-```
-然后把 https://github.com/golang/net co 到这个目录下
-然后再
-```
 go get github.com/gin-gonic/gin
+git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
+go get github.com/zhanghjster/ChatChat
 cd server
 go build
 ./server
