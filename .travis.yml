@@ -20,6 +20,6 @@ install:
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
- - cd server && go test
+ - cd $TRAVIS_BUILD_DIR/server && go test
  
 
