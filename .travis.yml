@@ -12,7 +12,7 @@ install:
   - go get github.com/dgrijalva/jwt-go
   - go get github.com/gin-gonic/gin
   - go get github.com/BurntSushi/toml
-  - github.com/stretchr/testify/assert
+  - go get github.com/stretchr/testify/assert
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
