@@ -1,18 +1,19 @@
 package main
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 
-	"github.com/garyburd/redigo/redis"
 	"fmt"
+	"github.com/garyburd/redigo/redis"
 	"strconv"
 )
 
-var testDBpool = NewRDBpool("dockerhost:6379")
+var test_configure = LoadConfigure("../conf/server.cfg")
+var testDBpool = NewRDBpool(test_configure.Redis.Host)
 
 func TestRDBconnection(t *testing.T) {
-	db := testDBpool.Get();
+	db := testDBpool.Get()
 	defer db.Close()
 
 	assert.Nil(t, db.conn.Err())
@@ -42,20 +43,20 @@ func TestHMSETandHGETALL(t *testing.T) {
 	assert.Equal(40, reply.Age)
 	assert.Equal("Benx", reply.Name)
 
-	 _ = db.HMSET("st1", "name", "benx")
+	_ = db.HMSET("st1", "name", "benx")
 	n, err := db.DEL("st", "st1")
 	assert.Nil(err)
 	assert.Equal(2, n)
 }
 
-func TestSETandGET(t *testing.T)  {
+func TestSETandGET(t *testing.T) {
 	db := testDBpool.Get()
 	defer db.Close()
 
 	db.SET("benben", 1)
 
 	value, _ := redis.Int(db.GET("benben"))
-	assert.Equal(t, 1, value,  "get  check")
+	assert.Equal(t, 1, value, "get  check")
 
 	db.EXPIRE("benben", 1000000)
 
@@ -65,7 +66,7 @@ func TestSETandGET(t *testing.T)  {
 
 func TestINCRYBY(t *testing.T) {
 	db := testDBpool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	next_id, err := db.INCRBY("test_next_id", 1)
 
