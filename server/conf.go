@@ -1,9 +1,10 @@
 package main
-import (
-	"github.com/BurntSushi/toml"
-	"fmt"
-)
 
+import (
+	"fmt"
+	"github.com/BurntSushi/toml"
+	"os"
+)
 
 type redisConf struct {
 	Host string
@@ -18,11 +19,18 @@ type Configure struct {
 	Http  httpConf
 }
 
-func LoadConfigure(file string) *Configure {
+func LoadConfigure() *Configure {
+
+	var file = "../conf/server.cfg"
+	var default_file = "../conf/server_default.cfg"
+
+	if _, err := os.Stat(file); err != nil {
+		file = default_file
+	}
 
 	var config = Configure{}
 
-	if _, err := toml.DecodeFile(file, &config); err!=nil {
+	if _, err := toml.DecodeFile(file, &config); err != nil {
 		panic(err)
 	}
 
