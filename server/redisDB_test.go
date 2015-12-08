@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var test_configure = LoadConfigure("../conf/server.cfg")
+var test_configure = LoadConfigure()
 var testDBpool = NewRDBpool(test_configure.Redis.Host)
 
 func TestRDBconnection(t *testing.T) {
