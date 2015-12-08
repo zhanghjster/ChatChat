@@ -11,6 +11,7 @@ install:
   - go get github.com/garyburd/redigo/redis
   - go get github.com/dgrijalva/jwt-go
   - go get github.com/gin-gonic/gin
+  - go get github.com/BurntSushi/toml
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
