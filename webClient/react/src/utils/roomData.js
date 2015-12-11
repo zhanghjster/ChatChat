@@ -1,6 +1,7 @@
 /**
  * Created by ben on 15/11/25.
  */
+import {arrayContains} from "./index.js";
 
 class RoomData  {
 
@@ -24,6 +25,10 @@ class RoomData  {
         if (this._messages[roomID] == null) {
             this._messages[roomID] = [];
         }
+
+        if (arrayContains(this._members[roomID], message)) {
+            return;
+        }
         this._messages[roomID].push(message);
     }
 
@@ -42,6 +47,9 @@ class RoomData  {
     }
 
     getMessages(roomID) {
+        if ((typeof this._messages[roomID]) == "undefined") {
+            return [];
+        }
         return this._messages[roomID];
     }
 }

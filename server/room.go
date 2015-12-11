@@ -479,5 +479,9 @@ func getMaxMessageID(roomID int) (int64, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	return redis.Int64(db.GET(genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID))))
+	key := genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID))
+	if exist, _ := db.EXISTS(key); exist {
+		return redis.Int64(db.GET(key))
+	}
+	return 0, nil
 }

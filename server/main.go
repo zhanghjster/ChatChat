@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	serve()
+	HttpServer := NewHTTPServer(configure.Http.Port)
+	HttpServer.Serve()
 }
 
 var (
@@ -18,7 +19,7 @@ var (
 
 func init() {
 
-	configure = LoadConfigure()
+	configure = LoadConfigure("../conf/server_default.cfg")
 
 	rdbPool = NewRDBpool(configure.Redis.Host)
 	sessionManager, _ = NewSessionManager("chatchat", 100000)

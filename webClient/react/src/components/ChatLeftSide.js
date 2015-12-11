@@ -4,11 +4,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
-import {TAB_LOBBY} from '../constants';
+import {TAB_LOBBY, TAB_ROOM} from '../constants';
 
 export default  class ChatLeftSide extends React.Component {
     
-    
+
+    _changeTab(id, name) {
+        this.props.changeTab(TAB_ROOM, id, name);
+    }
+
     render() {
         let currentTab = this.props.currentTab;
         let roomList   = this.props.roomList;
@@ -16,7 +20,7 @@ export default  class ChatLeftSide extends React.Component {
         let roomItems = roomList.map((room) => {
             return (
                 <li className={ room.ID === currentTab.ID ? "active" : null }>
-                    <a href="#">
+                    <a href="#" onClick={() => {this.props.changeTab(TAB_ROOM, room.ID, room.Name)}} >
                         <span>{room.Name}</span>
                     </a>
                 </li>
@@ -32,7 +36,7 @@ export default  class ChatLeftSide extends React.Component {
 
             <ul className="chat-list">
                 <li className={ currentTab.Type == TAB_LOBBY ? "active" : null }>
-                    <a className="lobby" href="#">
+                    <a className="lobby" href="#" onClick={() => {this.props.changeTab(TAB_LOBBY)}}>
                         <h4>
                             <i className="fa fa-list"></i>
                             Lobby

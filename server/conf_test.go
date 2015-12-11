@@ -7,7 +7,7 @@ import (
 
 func TestConfig(t *testing.T) {
 
-	config := LoadConfigure()
+	config := LoadConfigure("../conf/server_default.cfg")
 
 	assert.NotNil(t, config)
 }

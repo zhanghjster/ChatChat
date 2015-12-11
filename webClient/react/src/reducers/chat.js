@@ -10,13 +10,15 @@ import {
     NEW_MESSAGE,
     MEMBER_ACTIVE, MEMBER_UNACTIVE, MEMBER_JOIN, MEMBER_LEAVE,
     TAB_LOBBY, TAB_ROOM, TAB_PEER,
-    CHANGE_TAB, LOGOUT, LOBBY_INITIALIZED_SUCCESS, ROOM_CREATED
+    CHANGE_TAB, LOGOUT, ROOM_CREATED,
+    LOBBY_INITIALIZE_SUCCESS, ROOM_INITIALIZE_SUCCESS
 } from "../constants";
 
 var tabInitialState = {
     initialized: false,
     Type: null,
     ID : null,
+    Name: ""
 };
 
 var initialized = createReducer(false, {
@@ -34,6 +36,7 @@ var currentTab = createReducer(tabInitialState, {
             initialized: false,
             Type: payload.currentTab.Type,
             ID: payload.currentTab.ID,
+            Name: payload.currentTab.Name,
         };
     },
 
@@ -54,16 +57,9 @@ var currentTab = createReducer(tabInitialState, {
             initialized: payload.initialized,
             Type: payload.Type,
             ID: payload.ID,
+            Name: payload.Name,
         });
     },
-
-    [ROOM_CREATED]: (state, payload) => {
-        return {
-            initialized: false,
-            Type: TAB_ROOM,
-            ID: payload.ID
-        }
-    }
 });
 
 var roomList = createReducer([], {
@@ -94,6 +90,10 @@ var roomList = createReducer([], {
 });
 
 var messageList = createReducer([], {
+    [ROOM_INITIALIZE_SUCCESS]: (state, payload) => {
+        return [...payload.messageList];
+    },
+
     [NEW_MESSAGE]: (state, payload) => {
         return [
             ...state, payload.message
@@ -101,9 +101,6 @@ var messageList = createReducer([], {
     },
     [TAB_CHANGING]: (state, payload) => {
         return [];
-    },
-    [TAB_CHANGED]: (state, payload) => {
-        return payload.messages;
     }
 });
 
@@ -115,28 +112,31 @@ var initializedTab = createReducer([], {
 })
 
 var memberList = createReducer([], {
+    [ROOM_INITIALIZE_SUCCESS]: (state, payload) => {
+        return [...payload.memberList];
+    },
     [MEMBER_ACTIVE]: (state, payload) => {
-        return payload.members;
+        return [...payload.memberList];
     },
     [MEMBER_UNACTIVE]: (state, payload) => {
-        return payload.members;
+        return [...payload.memberList];
     },
     [MEMBER_JOIN]: (state, payload) => {
-        return payload.members;
+        return [...payload.memberList];
     },
     [MEMBER_LEAVE]: (sate, payload) => {
-        return payload.members;
+        return [...payload.memberList];
     },
     [TAB_CHANGING]: (state, payload) => {
         return [];
     },
     [TAB_CHANGED]: (state, payload) => {
-        return payload.members;
+        return [...payload.memberList];
     },
 })
 
 var lobbyRoomList = createReducer([], {
-    [TAB_INITIALIZE_SUCCESS] : (stated, payload) => {
+    [LOBBY_INITIALIZE_SUCCESS] : (stated, payload) => {
         return payload.lobbyRoomList
     }
 })

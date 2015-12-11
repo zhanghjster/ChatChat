@@ -10,11 +10,13 @@ export default class MessageList extends React.Component {
 
     render() {
 
+
+
         let time = " at 1:55pm, 13th April 2013";
         return (
             <div>
                 <div className="chat-room-head">
-                    <h3>Water Cooler</h3>
+                    <h3>{this.props.title}</h3>
                     <form action="#" className="pull-right position">
                         <input type="text" placeholder="Search" className="form-control search-btn "/>
                     </form>

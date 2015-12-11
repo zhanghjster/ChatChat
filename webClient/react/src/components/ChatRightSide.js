@@ -9,6 +9,32 @@ import { Link } from 'react-router';
 export default class ChatRightSide extends React.Component {
 
     render() {
+
+        let memberItems = this.props.memberList.map(member => {
+
+            let statusClass = null;
+            switch (member.status) {
+                case "available":
+                    statusClass = "fa fa-circle text-success";
+                    break;
+                case "unavailable":
+                    statusClass = "fa fa-circle text-muted";
+                    break;
+                case "busy":
+                    statusClass = "fa fa-circle text-danger";
+                    break;
+            }
+
+            return (
+                <li>
+                    <a href="chat_room.html">
+                        <i className={statusClass}></i>
+                        {member.username}
+                    </a>
+                </li>
+            )
+        });
+
         return (
             <aside className="right-side col-lg-2">
                 <div className="user-head">
@@ -19,53 +45,7 @@ export default class ChatRightSide extends React.Component {
                     <h4 className="pull-left">People</h4>
                 </div>
                 <ul className="chat-available-user">
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-success"></i>
-                            Jonathan Smith
-                            <span className="text-muted">3h:22m</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-success"></i>
-                            Jhone Due
-                            <span className="text-muted">1h:2m</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-success"></i>
-                            Franklyn Kalley
-                            <span className="text-muted">2h:32m</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-danger"></i>
-                            Anjelina joe
-                            <span className="text-muted">3h:22m</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-warning"></i>
-                            Aliace Stalvien
-                            <span className="text-muted">1h:12m</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-muted"></i>
-                            Stive jones
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat_room.html">
-                            <i className="fa fa-circle text-muted"></i>
-                            Jonathan Smith
-                        </a>
-                    </li>
+                    {memberItems}
                 </ul>
                 <div className="footer">
                     <a href="#" className="guest-on">

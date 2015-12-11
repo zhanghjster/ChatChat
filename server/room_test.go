@@ -14,10 +14,10 @@ func TestCurrentTab(t *testing.T) {
 
 	userID := 1
 
-	_, err := SaveCurrentTab(userID, currentTab)
+	_, err := saveCurrentTab(userID, currentTab)
 	assert.Nil(t, err, "save current tab err check")
 
-	ctab, err1 := GetCurrentTab(userID)
+	ctab, err1 := getCurrentTab(userID)
 
 	assert.Nil(t, err1, "get current tab err check")
 

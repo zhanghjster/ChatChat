@@ -48,6 +48,11 @@
      bottom: 0;
  }
 
+.chat-room .left-side .chat-list {
+    height: 630px;
+    overflow-y:auto;
+}
+
 .chat-room .mid-side .message-list {
      height: 650px;
      overflow-y:auto;
@@ -116,4 +121,17 @@
 
 .hidden-block {
     display: none;
+}
+
+.room-desk {
+    height: 710px;
+    overflow-y:auto;
+}
+
+.chat-room-head h3:first-letter {
+    text-transform: uppercase
+}
+
+ul.chat-available-user li i {
+    text-transform: uppercase
 }

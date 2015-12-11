@@ -48,18 +48,39 @@ webpackJsonp([1],[
 	        { top: true, right: true, bottom: true },
 	        _react2['default'].createElement(DevTools, { store: store, monitor: LogMonitor })
 	    );
+	    _reactDom2['default'].render(_react2['default'].createElement(
+	        'div',
+	        { classNmae: 'container' },
+	        _react2['default'].createElement(
+	            'div',
+	            { className: 'row' },
+	            _react2['default'].createElement(
+	                'div',
+	                { className: 'col-md-10' },
+	                _react2['default'].createElement(
+	                    _reactRedux.Provider,
+	                    { store: store },
+	                    _routes2['default']
+	                )
+	            ),
+	            _react2['default'].createElement(
+	                'div',
+	                { className: 'col-md-2' },
+	                debugPannel
+	            )
+	        )
+	    ), document.getElementById('APP'));
+	} else {
+	    _reactDom2['default'].render(_react2['default'].createElement(
+	        'div',
+	        null,
+	        _react2['default'].createElement(
+	            _reactRedux.Provider,
+	            { store: store },
+	            _routes2['default']
+	        )
+	    ), document.getElementById('APP'));
 	}
-
-	_reactDom2['default'].render(_react2['default'].createElement(
-	    'div',
-	    null,
-	    _react2['default'].createElement(
-	        _reactRedux.Provider,
-	        { store: store },
-	        _routes2['default']
-	    ),
-	    debugPannel
-	), document.getElementById('APP'));
 
 /***/ },
 /* 1 */,
@@ -2708,7 +2729,9 @@ webpackJsonp([1],[
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _roomDataJs = __webpack_require__(262);
+	var _roomData = __webpack_require__(262);
+
+	var _roomData2 = _interopRequireDefault(_roomData);
 
 	var _history = __webpack_require__(257);
 
@@ -2772,18 +2795,17 @@ webpackJsonp([1],[
 	exports.createConstants = createConstants;
 	exports.checkHttpStatus = checkHttpStatus;
 	exports.parseJSON = parseJSON;
-	exports.roomData = _roomDataJs.roomData;
+	exports.roomData = _roomData2['default'];
 	exports.arrayContains = arrayContains;
 	exports.authCheck = authCheck;
 
 /***/ },
 /* 262 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Created by ben on 15/11/25.
 	 */
-
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -2793,6 +2815,8 @@ webpackJsonp([1],[
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var _indexJs = __webpack_require__(261);
 
 	var RoomData = (function () {
 	    function RoomData() {
@@ -2821,6 +2845,10 @@ webpackJsonp([1],[
 	            if (this._messages[roomID] == null) {
 	                this._messages[roomID] = [];
 	            }
+
+	            if ((0, _indexJs.arrayContains)(this._members[roomID], message)) {
+	                return;
+	            }
 	            this._messages[roomID].push(message);
 	        }
 	    }, {
@@ -2842,6 +2870,9 @@ webpackJsonp([1],[
 	    }, {
 	        key: "getMessages",
 	        value: function getMessages(roomID) {
+	            if (typeof this._messages[roomID] == "undefined") {
+	                return [];
+	            }
 	            return this._messages[roomID];
 	        }
 	    }]);
@@ -2881,7 +2912,7 @@ webpackJsonp([1],[
 	exports.tabInitialize = tabInitialize;
 	exports.lobbyInitialize = lobbyInitialize;
 	exports.roomInitialize = roomInitialize;
-	exports.roomInitializeFail = roomInitializeFail;
+	exports.tabInitiallizeSuccess = tabInitiallizeSuccess;
 	exports.createRoom = createRoom;
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -2949,16 +2980,18 @@ webpackJsonp([1],[
 	    };
 	}
 
-	function changeTab(newType, newID) {
+	function changeTab(newType, newID, name) {
 	    return function (dispatch, getState) {
 	        var state = getState();
+	        console.log(state.chat.initializedTab);
 
 	        dispatch({
-	            type: TAB_CHANGED,
+	            type: _constants.TAB_CHANGED,
 	            payload: {
-	                initialized: state.initializedTab[newID],
+	                initialized: state.chat.initializedTab[newID],
 	                Type: newType,
 	                ID: newID,
+	                Name: name,
 	                messageList: _utils.roomData.getMessages(newID),
 	                memberList: _utils.roomData.getMembers(newID)
 	            }
@@ -2973,6 +3006,16 @@ webpackJsonp([1],[
 	                'Authorization': 'Bearer ' + state.auth.token
 	            },
 	            body: JSON.stringify({ ID: newID, Type: newType })
+	        }).then(_utils.checkHttpStatus).then(_utils.parseJSON).then(function (response) {
+	            console.log(response);
+	        })['catch'](function (err) {
+	            if (err.response != null) {
+	                err.response.json().then(function (json) {
+	                    console.log(json);
+	                });
+	            } else {
+	                console.log(err);
+	            }
 	        });
 	    };
 	}
@@ -3027,6 +3070,13 @@ webpackJsonp([1],[
 	            }
 	        }).then(_utils.checkHttpStatus).then(_utils.parseJSON).then(function (response) {
 	            var currentTab = response.currentTab;
+	            for (var i in response.roomList) {
+	                var room = response.roomList[i];
+	                if (room.ID == currentTab.ID) {
+	                    currentTab.Name = room.Name;
+	                }
+	            }
+
 	            dispatch(chatInitializeSuccess({
 	                initialized: true,
 	                currentTab: currentTab,
@@ -3098,8 +3148,9 @@ webpackJsonp([1],[
 	            'Authorization': 'Bearer ' + token
 	        }
 	    }).then(_utils.checkHttpStatus).then(_utils.parseJSON).then(function (response) {
+	        dispatch(tabInitiallizeSuccess(currentTab.ID));
 	        dispatch({
-	            type: _constants.TAB_INITIALIZE_SUCCESS,
+	            type: _constants.LOBBY_INITIALIZE_SUCCESS,
 	            payload: {
 	                lobbyRoomList: response.roomList,
 	                ID: currentTab.ID
@@ -3116,22 +3167,36 @@ webpackJsonp([1],[
 
 	function roomInitialize(dispatch, state) {
 	    var token = state.auth.token;
+	    var roomID = state.chat.currentTab.ID;
 
-	    fetch(API_BASE + '/room_initialize?roomID=' + state.chat.currentTab.ID, {
+	    fetch(API_BASE + '/room_initialize?roomID=' + roomID, {
 	        method: 'get',
 	        headers: {
 	            'Authorization': 'Bearer ' + token
 	        }
 	    }).then(_utils.checkHttpStatus).then(_utils.parseJSON).then(function (response) {
 	        // save memberList and message list to cache
-	        var memberList = response.memberList;
-	        var messageList = response.messageList;
+	        for (var i in response.memberList) {
+	            _utils.roomData.addMember(roomID, response.memberList[i]);
+	        }
+	        for (var i in response.messageList) {
+	            _utils.roomData.addMessage(roomID, response.messageList[i]);
+	        }
 
-	        // get message and membet list from cache
+	        // initialize success
+	        dispatch(tabInitiallizeSuccess(roomID));
+	        dispatch({
+	            type: _constants.ROOM_INITIALIZE_SUCCESS,
+	            payload: {
+	                messageList: _utils.roomData.getMessages(roomID),
+	                memberList: _utils.roomData.getMembers(roomID),
+	                ID: roomID
+	            }
+	        });
 	    })['catch'](function (err) {
 	        if (err.response != null) {
 	            err.response.json().then(function (json) {
-	                dispatch(roomInitializeFail(json.ERR));
+	                console.log(json.ERR);
 	            });
 	        } else {
 	            console.log(err);
@@ -3139,12 +3204,10 @@ webpackJsonp([1],[
 	    });
 	}
 
-	function roomInitializeFail() {
+	function tabInitiallizeSuccess(tabID) {
 	    return {
-	        type: CHAT_INITIALIZE_FAIL,
-	        payload: {
-	            signupError: error
-	        }
+	        type: _constants.TAB_INITIALIZE_SUCCESS,
+	        payload: { ID: tabID }
 	    };
 	}
 
@@ -3171,6 +3234,8 @@ webpackJsonp([1],[
 	                    ID: response.ID, Name: response.Name
 	                }
 	            });
+	            console.log(response);
+	            dispatch(changeTab(_constants.TAB_ROOM, response.ID, data.name));
 	        })['catch'](function (err) {
 	            if (err.response != null) {
 	                err.response.json().then(function (json) {
@@ -3594,7 +3659,7 @@ webpackJsonp([1],[
 
 	var _utils = __webpack_require__(261);
 
-	exports['default'] = (0, _utils.createConstants)('LOGIN_REQUEST', 'LOGIN_SUCCESS', 'LOGIN_FAIL', 'LOGOUT', 'LOGOUT', 'SIGNUP_REQUEST', 'SIGNUP_FAIL', 'CHAT_INITIALIZE_FAIL', 'CHAT_INITIALIZE_SUCCESS', 'TAB_INITIALIZE_FAIL', 'TAB_INITIALIZE_SUCCESS', 'ROOM_INITIALIZED', 'ROOM_CHANGING', 'ROOM_CHANGED', 'ROOMLIST_INITIALIZED', 'LEAVE_ROOM', 'JOIN_ROOM', 'CREATE_ROOM', 'NEW_MESSAGE', 'MEMBER_ACTIVE', 'MEMBER_UNACTIVE', 'MEMBER_JOIN', 'MEMBER_LEAVE', 'TAB_LOBBY', 'TAB_ROOM', 'TAB_PEER', 'CHANGE_TAB', 'LOBBY_INITIALIZED_SUCCESS', 'ROOM_CREATED');
+	exports['default'] = (0, _utils.createConstants)('LOGIN_REQUEST', 'LOGIN_SUCCESS', 'LOGIN_FAIL', 'LOGOUT', 'LOGOUT', 'SIGNUP_REQUEST', 'SIGNUP_FAIL', 'CHAT_INITIALIZE_FAIL', 'CHAT_INITIALIZE_SUCCESS', 'TAB_INITIALIZE_FAIL', 'TAB_INITIALIZE_SUCCESS', 'ROOM_INITIALIZED', 'ROOM_CHANGING', 'ROOM_CHANGED', 'ROOMLIST_INITIALIZED', 'LEAVE_ROOM', 'JOIN_ROOM', 'CREATE_ROOM', 'NEW_MESSAGE', 'MEMBER_ACTIVE', 'MEMBER_UNACTIVE', 'MEMBER_JOIN', 'MEMBER_LEAVE', 'TAB_LOBBY', 'TAB_ROOM', 'TAB_PEER', 'TAB_CHANGED', 'CHANGE_TAB', 'ROOM_CREATED', 'LOBBY_INITIALIZE_SUCCESS', 'ROOM_INITIALIZE_SUCCESS');
 	module.exports = exports['default'];
 
 /***/ },
@@ -3813,7 +3878,8 @@ webpackJsonp([1],[
 	var tabInitialState = {
 	    initialized: false,
 	    Type: null,
-	    ID: null
+	    ID: null,
+	    Name: ''
 	};
 
 	var initialized = (0, _utils.createReducer)(false, (_createReducer = {}, _defineProperty(_createReducer, _constants.CHAT_INITIALIZE_SUCCESS, function (state, payload) {
@@ -3826,7 +3892,8 @@ webpackJsonp([1],[
 	    return {
 	        initialized: false,
 	        Type: payload.currentTab.Type,
-	        ID: payload.currentTab.ID
+	        ID: payload.currentTab.ID,
+	        Name: payload.currentTab.Name
 	    };
 	}), _defineProperty(_createReducer2, _constants.TAB_INITIALIZE_SUCCESS, function (state, payload) {
 	    return Object.assign({}, state, {
@@ -3840,14 +3907,9 @@ webpackJsonp([1],[
 	    return Object.assign({}, state, {
 	        initialized: payload.initialized,
 	        Type: payload.Type,
-	        ID: payload.ID
+	        ID: payload.ID,
+	        Name: payload.Name
 	    });
-	}), _defineProperty(_createReducer2, _constants.ROOM_CREATED, function (state, payload) {
-	    return {
-	        initialized: false,
-	        Type: _constants.TAB_ROOM,
-	        ID: payload.ID
-	    };
 	}), _createReducer2));
 
 	var roomList = (0, _utils.createReducer)([], (_createReducer3 = {}, _defineProperty(_createReducer3, _constants.CHAT_INITIALIZE_SUCCESS, function (state, payload) {
@@ -3863,12 +3925,12 @@ webpackJsonp([1],[
 	    }].concat(_toConsumableArray(state));
 	}), _createReducer3));
 
-	var messageList = (0, _utils.createReducer)([], (_createReducer4 = {}, _defineProperty(_createReducer4, _constants.NEW_MESSAGE, function (state, payload) {
+	var messageList = (0, _utils.createReducer)([], (_createReducer4 = {}, _defineProperty(_createReducer4, _constants.ROOM_INITIALIZE_SUCCESS, function (state, payload) {
+	    return [].concat(_toConsumableArray(payload.messageList));
+	}), _defineProperty(_createReducer4, _constants.NEW_MESSAGE, function (state, payload) {
 	    return [].concat(_toConsumableArray(state), [payload.message]);
 	}), _defineProperty(_createReducer4, _constants.TAB_CHANGING, function (state, payload) {
 	    return [];
-	}), _defineProperty(_createReducer4, _constants.TAB_CHANGED, function (state, payload) {
-	    return payload.messages;
 	}), _createReducer4));
 
 	var initializedTab = (0, _utils.createReducer)([], _defineProperty({}, _constants.TAB_INITIALIZE_SUCCESS, function (state, payload) {
@@ -3876,21 +3938,23 @@ webpackJsonp([1],[
 	    return Object.assign({}, state);
 	}));
 
-	var memberList = (0, _utils.createReducer)([], (_createReducer6 = {}, _defineProperty(_createReducer6, _constants.MEMBER_ACTIVE, function (state, payload) {
-	    return payload.members;
+	var memberList = (0, _utils.createReducer)([], (_createReducer6 = {}, _defineProperty(_createReducer6, _constants.ROOM_INITIALIZE_SUCCESS, function (state, payload) {
+	    return [].concat(_toConsumableArray(payload.memberList));
+	}), _defineProperty(_createReducer6, _constants.MEMBER_ACTIVE, function (state, payload) {
+	    return [].concat(_toConsumableArray(payload.memberList));
 	}), _defineProperty(_createReducer6, _constants.MEMBER_UNACTIVE, function (state, payload) {
-	    return payload.members;
+	    return [].concat(_toConsumableArray(payload.memberList));
 	}), _defineProperty(_createReducer6, _constants.MEMBER_JOIN, function (state, payload) {
-	    return payload.members;
+	    return [].concat(_toConsumableArray(payload.memberList));
 	}), _defineProperty(_createReducer6, _constants.MEMBER_LEAVE, function (sate, payload) {
-	    return payload.members;
+	    return [].concat(_toConsumableArray(payload.memberList));
 	}), _defineProperty(_createReducer6, _constants.TAB_CHANGING, function (state, payload) {
 	    return [];
 	}), _defineProperty(_createReducer6, _constants.TAB_CHANGED, function (state, payload) {
-	    return payload.members;
+	    return [].concat(_toConsumableArray(payload.memberList));
 	}), _createReducer6));
 
-	var lobbyRoomList = (0, _utils.createReducer)([], _defineProperty({}, _constants.TAB_INITIALIZE_SUCCESS, function (stated, payload) {
+	var lobbyRoomList = (0, _utils.createReducer)([], _defineProperty({}, _constants.LOBBY_INITIALIZE_SUCCESS, function (stated, payload) {
 	    return payload.lobbyRoomList;
 	}));
 

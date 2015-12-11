@@ -8,8 +8,9 @@ import {
     SIGNUP_REQUEST, SIGNUP_FAIL,
     CHAT_INITIALIZE_SUCCESS, CHANNEL_INITIALIZE_FAIL,
     TAB_INITIALIZE_SUCCESS, TAB_INITIALIZE_FAIL,
-    TAB_LOBBY, TAB_ROOM, TAB_PEER,
-    CHANGE_TAB, LOBBY_INITIALIZED_SUCCESS, ROOM_CREATED
+    TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
+    CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
+    ROOM_INITIALIZE_SUCCESS,
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -71,16 +72,18 @@ export function loginRequest() {
     }
 }
 
-export function changeTab(newType, newID) {
+export function changeTab(newType, newID, name) {
     return (dispatch, getState) => {
         let state = getState();
+        console.log(state.chat.initializedTab);
 
         dispatch({
             type: TAB_CHANGED,
             payload: {
-                initialized: state.initializedTab[newID],
+                initialized: state.chat.initializedTab[newID],
                 Type: newType,
                 ID : newID,
+                Name: name,
                 messageList: roomData.getMessages(newID),
                 memberList: roomData.getMembers(newID)
             }
@@ -95,9 +98,18 @@ export function changeTab(newType, newID) {
                 'Authorization': `Bearer ${state.auth.token}`
             },
             body: JSON.stringify({ID: newID, Type: newType})
+        }).then(checkHttpStatus).then(parseJSON).then(response => {
+            console.log(response);
+        }).catch( err => {
+            if (err.response != null) {
+                err.response.json().then( json => {
+                    console.log(json);
+                })
+            } else {
+                console.log(err);
+            }
         });
     }
-
 }
 
 // signup
@@ -156,6 +168,13 @@ export function chatInitialize() {
         .then(parseJSON)
         .then(response => {
                 let currentTab = response.currentTab;
+                for (var i in response.roomList) {
+                    let room = response.roomList[i];
+                    if (room.ID == currentTab.ID) {
+                        currentTab.Name = room.Name;
+                    }
+                }
+
                 dispatch(chatInitializeSuccess({
                     initialized: true,
                     currentTab:  currentTab,
@@ -227,8 +246,9 @@ export function lobbyInitialize(dispatch, state)  {
             'Authorization': `Bearer ${token}`
         }
     }).then(checkHttpStatus).then(parseJSON).then(response => {
+        dispatch(tabInitiallizeSuccess(currentTab.ID));
         dispatch({
-            type: TAB_INITIALIZE_SUCCESS,
+            type: LOBBY_INITIALIZE_SUCCESS,
             payload: {
                 lobbyRoomList: response.roomList,
                 ID: currentTab.ID
@@ -248,8 +268,9 @@ export function lobbyInitialize(dispatch, state)  {
 
 export function roomInitialize(dispatch, state) {
     let token = state.auth.token;
+    let roomID = state.chat.currentTab.ID;
 
-    fetch(API_BASE + "/room_initialize?roomID="+state.chat.currentTab.ID, {
+    fetch(API_BASE + "/room_initialize?roomID="+roomID, {
         method: 'get',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -259,16 +280,28 @@ export function roomInitialize(dispatch, state) {
     .then(parseJSON)
     .then((response) => {
             // save memberList and message list to cache
-            let memberList = response.memberList;
-            let messageList= response.messageList;
-            
-            // get message and membet list from cache
+            for (var i in response.memberList) {
+                roomData.addMember(roomID, response.memberList[i]);
+            }
+            for (var i in response.messageList) {
+                roomData.addMessage(roomID, response.messageList[i]);
+            }
 
+            // initialize success
+            dispatch(tabInitiallizeSuccess(roomID));
+            dispatch({
+                type: ROOM_INITIALIZE_SUCCESS,
+                payload: {
+                    messageList: roomData.getMessages(roomID),
+                    memberList: roomData.getMembers(roomID),
+                    ID: roomID
+                }
+            })
     })
     .catch( (err) => {
         if (err.response != null) {
             err.response.json().then( json => {
-                dispatch(roomInitializeFail(json.ERR));
+                console.log(json.ERR);
             })
         } else {
             console.log(err);
@@ -276,12 +309,10 @@ export function roomInitialize(dispatch, state) {
     });
 }
 
-export function roomInitializeFail() {
+export function tabInitiallizeSuccess(tabID) {
     return {
-        type: CHAT_INITIALIZE_FAIL,
-        payload: {
-            signupError: error
-        }
+        type: TAB_INITIALIZE_SUCCESS,
+        payload: { ID: tabID}
     }
 }
 
@@ -306,6 +337,8 @@ export function createRoom(data) {
                     ID: response.ID, Name: response.Name,
                 }
             });
+            console.log(response);
+            dispatch(changeTab(TAB_ROOM, response.ID, data.name));
         }).catch(err => {
             if (err.response != null) {
                 err.response.json().then( json => {

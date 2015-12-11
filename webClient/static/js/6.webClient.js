@@ -501,7 +501,7 @@ webpackJsonp([6,2,3,4,5],{
 	                    });
 	                    break;
 	                case _constants.TAB_ROOM:
-	                    list = _react2['default'].createElement(_index.MessageList, null);
+	                    list = _react2['default'].createElement(_index.MessageList, { title: currentTab.Name });
 	                    break;
 	            }
 
@@ -510,9 +510,12 @@ webpackJsonp([6,2,3,4,5],{
 	                { className: 'chat-room' },
 	                _react2['default'].createElement(_index.ChatLeftSide, {
 	                    roomList: this.props.chat.roomList,
-	                    currentTab: this.props.chat.currentTab }),
+	                    currentTab: this.props.chat.currentTab,
+	                    changeTab: function (type, id, name) {
+	                        _this.props.dispatch((0, _actions.changeTab)(type, id, name));
+	                    } }),
 	                _react2['default'].createElement(_index.ChatMiddleSide, { list: list }),
-	                _react2['default'].createElement(_index.ChatRightSide, null)
+	                _react2['default'].createElement(_index.ChatRightSide, { memberList: chatProps.memberList })
 	            );
 	        }
 	    }]);
@@ -714,8 +717,15 @@ webpackJsonp([6,2,3,4,5],{
 	    }
 
 	    _createClass(ChatLeftSide, [{
+	        key: '_changeTab',
+	        value: function _changeTab(id, name) {
+	            this.props.changeTab(_constants.TAB_ROOM, id, name);
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this = this;
+
 	            var currentTab = this.props.currentTab;
 	            var roomList = this.props.roomList;
 
@@ -725,7 +735,9 @@ webpackJsonp([6,2,3,4,5],{
 	                    { className: room.ID === currentTab.ID ? 'active' : null },
 	                    _react2['default'].createElement(
 	                        'a',
-	                        { href: '#' },
+	                        { href: '#', onClick: function () {
+	                                _this.props.changeTab(_constants.TAB_ROOM, room.ID, room.Name);
+	                            } },
 	                        _react2['default'].createElement(
 	                            'span',
 	                            null,
@@ -756,7 +768,9 @@ webpackJsonp([6,2,3,4,5],{
 	                        { className: currentTab.Type == _constants.TAB_LOBBY ? 'active' : null },
 	                        _react2['default'].createElement(
 	                            'a',
-	                            { className: 'lobby', href: '#' },
+	                            { className: 'lobby', href: '#', onClick: function () {
+	                                    _this.props.changeTab(_constants.TAB_LOBBY);
+	                                } },
 	                            _react2['default'].createElement(
 	                                'h4',
 	                                null,
@@ -885,6 +899,34 @@ webpackJsonp([6,2,3,4,5],{
 	    _createClass(ChatRightSide, [{
 	        key: 'render',
 	        value: function render() {
+
+	            var memberItems = this.props.memberList.map(function (member) {
+
+	                var statusClass = null;
+	                switch (member.status) {
+	                    case 'available':
+	                        statusClass = 'fa fa-circle text-success';
+	                        break;
+	                    case 'unavailable':
+	                        statusClass = 'fa fa-circle text-muted';
+	                        break;
+	                    case 'busy':
+	                        statusClass = 'fa fa-circle text-danger';
+	                        break;
+	                }
+
+	                return _react2['default'].createElement(
+	                    'li',
+	                    null,
+	                    _react2['default'].createElement(
+	                        'a',
+	                        { href: 'chat_room.html' },
+	                        _react2['default'].createElement('i', { className: statusClass }),
+	                        member.username
+	                    )
+	                );
+	            });
+
 	            return _react2['default'].createElement(
 	                'aside',
 	                { className: 'right-side col-lg-2' },
@@ -916,101 +958,7 @@ webpackJsonp([6,2,3,4,5],{
 	                _react2['default'].createElement(
 	                    'ul',
 	                    { className: 'chat-available-user' },
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-success' }),
-	                            'Jonathan Smith',
-	                            _react2['default'].createElement(
-	                                'span',
-	                                { className: 'text-muted' },
-	                                '3h:22m'
-	                            )
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-success' }),
-	                            'Jhone Due',
-	                            _react2['default'].createElement(
-	                                'span',
-	                                { className: 'text-muted' },
-	                                '1h:2m'
-	                            )
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-success' }),
-	                            'Franklyn Kalley',
-	                            _react2['default'].createElement(
-	                                'span',
-	                                { className: 'text-muted' },
-	                                '2h:32m'
-	                            )
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-danger' }),
-	                            'Anjelina joe',
-	                            _react2['default'].createElement(
-	                                'span',
-	                                { className: 'text-muted' },
-	                                '3h:22m'
-	                            )
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-warning' }),
-	                            'Aliace Stalvien',
-	                            _react2['default'].createElement(
-	                                'span',
-	                                { className: 'text-muted' },
-	                                '1h:12m'
-	                            )
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-muted' }),
-	                            'Stive jones'
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'li',
-	                        null,
-	                        _react2['default'].createElement(
-	                            'a',
-	                            { href: 'chat_room.html' },
-	                            _react2['default'].createElement('i', { className: 'fa fa-circle text-muted' }),
-	                            'Jonathan Smith'
-	                        )
-	                    )
+	                    memberItems
 	                ),
 	                _react2['default'].createElement(
 	                    'div',
@@ -1223,7 +1171,7 @@ webpackJsonp([6,2,3,4,5],{
 	                    _react2['default'].createElement(
 	                        'h3',
 	                        null,
-	                        'Water Cooler'
+	                        this.props.title
 	                    ),
 	                    _react2['default'].createElement(
 	                        'form',

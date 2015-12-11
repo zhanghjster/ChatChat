@@ -55,7 +55,7 @@ class Chat extends React.Component {
                 );
                 break;
             case TAB_ROOM:
-                list = (<MessageList/>);
+                list = (<MessageList title={currentTab.Name}/>);
                 break;
         }
 
@@ -63,9 +63,10 @@ class Chat extends React.Component {
             <div className="chat-room">
                 <ChatLeftSide
                 roomList={this.props.chat.roomList}
-                currentTab={this.props.chat.currentTab}/>
+                currentTab={this.props.chat.currentTab}
+                    changeTab={(type, id, name) => {this.props.dispatch(changeTab(type, id, name))}}/>
                 <ChatMiddleSide list={list}/>
-                <ChatRightSide/>
+                <ChatRightSide memberList={chatProps.memberList}/>
             </div>
         )
     }

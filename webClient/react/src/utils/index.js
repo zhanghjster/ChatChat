@@ -1,7 +1,7 @@
 /**
  * Created by ben on 15/11/18.
  */
-import {roomData} from './roomData.js';
+import roomData from './roomData';
 import history from './history';
 
 let createReducer = (initialState, reducerMap) => {
