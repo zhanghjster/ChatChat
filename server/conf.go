@@ -11,7 +11,7 @@ type redisConf struct {
 }
 
 type httpConf struct {
-	Port int
+	Host string
 }
 
 type Configure struct {
