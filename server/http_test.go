@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 	"time"
 )
 
@@ -17,8 +17,8 @@ func TestEncrypt(t *testing.T) {
 
 	assert.Equal(t, new_password, encryp(password))
 
-	ti := time.Now().Add(time.Hour*3).Unix()
+	ti := time.Now().Add(time.Hour * 3).Unix()
 
-	fmt.Println(ti);
+	fmt.Println(ti)
 
 }

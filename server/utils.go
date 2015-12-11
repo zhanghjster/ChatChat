@@ -1,10 +1,11 @@
 package main
+
 import (
-//	"io"
-//	"encoding/base64"
-	"time"
+	//	"io"
+	//	"encoding/base64"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -42,4 +43,3 @@ func GUID(n int) string {
 
 	return string(b)
 }
-

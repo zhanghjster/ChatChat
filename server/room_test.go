@@ -1,9 +1,9 @@
 package main
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestCurrentTab(t *testing.T) {
@@ -30,12 +30,12 @@ func TestRoomRaw(t *testing.T) {
 	userID := 1
 
 	roomRaw := &RoomRaw{
-		Name: "Benx's second room",
-		OwnerID: userID,
-		IsPrivate: true,
-		Password: "123123",
-		Members: 0,
-		Hash: GUID(32),
+		Name:        "Benx's second room",
+		OwnerID:     userID,
+		IsPrivate:   true,
+		Password:    "123123",
+		Members:     0,
+		Hash:        GUID(32),
 		Description: "beautifull",
 	}
 
@@ -69,12 +69,12 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.True(t, exists, "peer in room")
 
 	/*
-	suc1, err1 := PeerLeaveRoom(userID, roomID)
-	assert.Nil(t, err1, "peer leave room err check")
-	assert.True(t, suc1, "peer leave room suc check")
+		suc1, err1 := PeerLeaveRoom(userID, roomID)
+		assert.Nil(t, err1, "peer leave room err check")
+		assert.True(t, suc1, "peer leave room suc check")
 
-	_, err3 := PeerInRoom(userID, roomID)
-	assert.NotNil(t, err3, "peer in room error check")
+		_, err3 := PeerInRoom(userID, roomID)
+		assert.NotNil(t, err3, "peer in room error check")
 	*/
 }
 
