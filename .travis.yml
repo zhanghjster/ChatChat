@@ -6,6 +6,9 @@ go:
 services:
   - redis-server
 
+before_install:
+  - nvm install 5.1.1
+
 install:
   - go get github.com/gorilla/websocket
   - go get github.com/garyburd/redigo/redis
@@ -13,9 +16,10 @@ install:
   - go get github.com/gin-gonic/gin
   - go get github.com/BurntSushi/toml
   - go get github.com/stretchr/testify/assert
+  - cd webClient/react && npm install
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
- - cd server && go test
+ - cd $TRAVIS_BUILD_DIR/server && go test
  
 

@@ -1,14 +1,15 @@
 package main
+
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
-	"time"
-	"regexp"
-	"github.com/dgrijalva/jwt-go"
 	"crypto/md5"
-	"io"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"io"
+	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 type CurrentTab struct {
@@ -22,23 +23,11 @@ const (
 
 var JWT_SECRET = []byte("JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
 
-type HttpServer struct {
-	port int
-	sessionManager *SessionManager
-}
-
-func NewHTTPServer(port int) *HttpServer {
-
-	return &HttpServer{
-		port: port,
-	}
-}
-
-func (s *HttpServer) Serve() {
+func serve() {
 	r := gin.Default()
 
 	sameHandlerMap := []string{
-		"/", "/login","/logout","/signup","/chat",
+		"/", "/login", "/logout", "/signup", "/chat",
 	}
 
 	for _, route := range sameHandlerMap {
@@ -62,18 +51,18 @@ func (s *HttpServer) Serve() {
 	r.LoadHTMLGlob("../webClient/templates/*")
 
 	staticMap := []string{
-		"css","img","js", "assets",
+		"css", "img", "js", "assets",
 	}
 	for _, path := range staticMap {
-		r.Static(path, "../webClient/static/" + path)
+		r.Static(path, "../webClient/static/"+path)
 	}
 
-	r.Run(":3001")
+	r.Run(configure.Http.Host)
 }
 
 func loginEndpoint(c *gin.Context) {
 
-	var json = &struct{
+	var json = &struct {
 		Username string `form:"username" json:"username" binding:"required"`
 		Password string `form:"password" json:"password" binding:"required"`
 	}{}
@@ -90,29 +79,29 @@ func loginEndpoint(c *gin.Context) {
 }
 
 func createRoomEndPoint(c *gin.Context) {
-	var json = &struct{
-		Name string 		`form:"name" 		json:"name" 		binding:"required"`
-		Description string 	`form:"description" json:"description"`
+	var json = &struct {
+		Name        string `form:"name" 		json:"name" 		binding:"required"`
+		Description string `form:"description" json:"description"`
 	}{}
 
 	if c.Bind(json) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"ERR" : "WRONG_INPUT"})
+		c.JSON(http.StatusBadRequest, gin.H{"ERR": "WRONG_INPUT"})
 		return
 	}
 
 	userID64, _ := c.Get("userID")
 
 	roomRaw := &RoomRaw{
-		Name: json.Name,
+		Name:        json.Name,
 		Description: json.Description,
-		OwnerID: userID64.(int),
+		OwnerID:     userID64.(int),
 	}
 
 	roomID, err := saveRoomRaw(roomRaw)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "INTERNAL_SERVER_ERR"});
-		return;
+		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "INTERNAL_SERVER_ERR"})
+		return
 	}
 
 	// return roomid and name
@@ -122,12 +111,12 @@ func createRoomEndPoint(c *gin.Context) {
 }
 
 func signupEndPoint(c *gin.Context) {
-	var json = &struct{
+	var json = &struct {
 		Username string `form:"username" json:"username" binding:"required"`
 		Password string `form:"password" json:"password" binding:"required"`
 	}{}
 
-	if c.Bind(json) != nil  {
+	if c.Bind(json) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"ERR": "WRONG_INPUT"})
 		return
 	}
@@ -135,13 +124,13 @@ func signupEndPoint(c *gin.Context) {
 	// username exists?
 	if usernameExists(json.Username) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"ERR"  : "USERNAME_EXISTS",
+			"ERR": "USERNAME_EXISTS",
 		})
 		return
 	}
 
 	// only character and number supported
-	if match, _:= regexp.MatchString(`^[a-zA-Z0-9]+$`, json.Username); !match {
+	if match, _ := regexp.MatchString(`^[a-zA-Z0-9]+$`, json.Username); !match {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"ERR": "INVALIDE_USERNAME",
 		})
@@ -157,8 +146,8 @@ func signupEndPoint(c *gin.Context) {
 	}
 
 	// create user
-	userID, err := createUser(json.Username, encryp(json.Password));
-	if  err != nil  {
+	userID, err := createUser(json.Username, encryp(json.Password))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ERR": "SERVER_ERROR",
 		})
@@ -171,9 +160,9 @@ func signupEndPoint(c *gin.Context) {
 
 func genJwtToken(userID int) string {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["userID"] = userID;
+	token.Claims["userID"] = userID
 	// expire in 3 month
-	token.Claims["expire_at"] = time.Now().Add(30*24*time.Hour).Unix()
+	token.Claims["expire_at"] = time.Now().Add(30 * 24 * time.Hour).Unix()
 	tokenString, _ := token.SignedString(JWT_SECRET)
 	return tokenString
 }
@@ -201,9 +190,9 @@ func chatEndPoint(c *gin.Context) {
 
 	peer := &Peer{
 		sendChan: make(chan []byte),
-		ws : ws,
-		ID : peerID,
-		roomID: room.ID,
+		ws:       ws,
+		ID:       peerID,
+		roomID:   room.ID,
 	}
 
 	room.registerChan <- peer
@@ -212,7 +201,7 @@ func chatEndPoint(c *gin.Context) {
 	peer.talk()
 }
 
-func chatInitializeEndPoint (c *gin.Context)  {
+func chatInitializeEndPoint(c *gin.Context) {
 	userID64, _ := c.Get("userID")
 	userID := userID64.(int)
 
@@ -232,43 +221,43 @@ func chatInitializeEndPoint (c *gin.Context)  {
 
 	// default tab is lobby
 	if currentTab.Type == "" {
-		currentTab.Type = TAB_LOBBY;
+		currentTab.Type = TAB_LOBBY
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"currentTab": currentTab,
-		"roomList": roomList,
+		"roomList":   roomList,
 	})
 }
 
 func lobbyInitializeEndPoin(c *gin.Context) {
-	roomIDs, _ := getNewRoomIDs(0, 10);
+	roomIDs, _ := getNewRoomIDs(0, 10)
 
 	roomList := make([]interface{}, len(roomIDs))
 	for i, roomID := range roomIDs {
 		raw, _ := getRoomRaw(roomID)
 		username, err := getUsername(raw.OwnerID)
 		if err != nil {
-			continue;
+			continue
 		}
-		roomList[i] = struct{
-			ID int
-			Name string
-			Description string
-			CreationTime string
+		roomList[i] = struct {
+			ID             int
+			Name           string
+			Description    string
+			CreationTime   string
 			LastUpdateTime string
-			IsPrivate bool
-			Members int
-			OwnerName string
+			IsPrivate      bool
+			Members        int
+			OwnerName      string
 		}{
-			ID: raw.ID,
-			Name: raw.Name,
-			Description: raw.Description,
-			CreationTime:  time.Unix(raw.CreationTime,0).Format(TIME_LAYOUT),
-			LastUpdateTime: time.Unix(raw.LastUpdateTime,0).Format(TIME_LAYOUT),
-			IsPrivate: raw.IsPrivate,
-			Members: raw.Members,
-			OwnerName: username,
+			ID:             raw.ID,
+			Name:           raw.Name,
+			Description:    raw.Description,
+			CreationTime:   time.Unix(raw.CreationTime, 0).Format(TIME_LAYOUT),
+			LastUpdateTime: time.Unix(raw.LastUpdateTime, 0).Format(TIME_LAYOUT),
+			IsPrivate:      raw.IsPrivate,
+			Members:        raw.Members,
+			OwnerName:      username,
 		}
 	}
 
@@ -278,7 +267,7 @@ func lobbyInitializeEndPoin(c *gin.Context) {
 }
 
 func roomInitializeEndPoint(c *gin.Context) {
-	roomID, _:= strconv.Atoi(c.Query("roomID"))
+	roomID, _ := strconv.Atoi(c.Query("roomID"))
 
 	maxMsgID, err := getMaxMessageID(roomID)
 	if err != nil {
@@ -286,7 +275,7 @@ func roomInitializeEndPoint(c *gin.Context) {
 		return
 	}
 
-	messages, err := getMessages(roomID, maxMsgID , 10)
+	messages, err := getMessages(roomID, maxMsgID, 10)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "INTERNAL_SERVER_ERR"})
 		return
@@ -298,34 +287,34 @@ func roomInitializeEndPoint(c *gin.Context) {
 		return
 	}
 
-	var peers = make([]interface{},len(*peerID))
+	var peers = make([]interface{}, len(*peerID))
 
 	for i, id := range *peerID {
 		username, _ := getUsername(id)
 		status, _ := gerUserStatus(id)
-		peers[i] = struct{
-			ID int		`json:"id"`
+		peers[i] = struct {
+			ID       int    `json:"id"`
 			Username string `json:"username"`
-			Status string	`json:"status"`
-		} {
-			ID: id,
+			Status   string `json:"status"`
+		}{
+			ID:       id,
 			Username: username,
-			Status: status,
+			Status:   status,
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"messageList": messages,
-		"memberlist": peers,
+		"memberlist":  peers,
 	})
 }
 
 func saveCurrentTabEndPoint(c *gin.Context) {
-	ID , _  := strconv.Atoi(c.Query("ID"))
-	Type  	:= c.Query("Type")
+	ID, _ := strconv.Atoi(c.Query("ID"))
+	Type := c.Query("Type")
 
 	userID64, _ := c.Get("userID")
-	userID 	:= userID64.(int)
+	userID := userID64.(int)
 
 	currentTab := CurrentTab{
 		Type: Type, ID: ID,
@@ -346,7 +335,7 @@ func authCheck() gin.HandlerFunc {
 
 		token, err := jwt.ParseFromRequest(c.Request, func(tokent *jwt.Token) (interface{}, error) {
 			return JWT_SECRET, nil
-		});
+		})
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusForbidden, gin.H{"ERR": "TOKEN_INVALIDE"})
@@ -355,9 +344,9 @@ func authCheck() gin.HandlerFunc {
 		}
 
 		expire_at := token.Claims["expire_at"].(float64)
-		userID    := token.Claims["userID"].(float64)
+		userID := token.Claims["userID"].(float64)
 
-		if time.Now().Unix() > int64(expire_at)  {
+		if time.Now().Unix() > int64(expire_at) {
 			c.JSON(http.StatusForbidden, gin.H{"ERR": "TOKEN_EXPIRED"})
 			c.Abort()
 			return
@@ -386,7 +375,7 @@ func encryp(s string) string {
 
 func GetCurrentTab(userID int) (*CurrentTab, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	currentTab := &CurrentTab{}
 
@@ -399,9 +388,9 @@ func GetCurrentTab(userID int) (*CurrentTab, error) {
 	return currentTab, nil
 }
 
-func SaveCurrentTab(userID int, currentTab CurrentTab) (bool, error){
+func SaveCurrentTab(userID int, currentTab CurrentTab) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	key := genRedisKey(CURRENT_TAB_PRE, strconv.Itoa(userID))
 	_, err := db.DEL(key)

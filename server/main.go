@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-	HttpServer := NewHTTPServer(configure.Http.Port)
-	HttpServer.Serve()
+	serve()
 }
 
 var (
