@@ -1,49 +1,50 @@
 package main
+
 import (
-	"time"
+	"encoding/json"
+	"errors"
+	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/websocket"
 	"log"
-	"encoding/json"
 	"strconv"
-	"github.com/garyburd/redigo/redis"
-	"errors"
+	"time"
 )
 
-const(
-	TypeMessage = 1
-	PEER_AVAILABLE = "available"
+const (
+	TypeMessage      = 1
+	PEER_AVAILABLE   = "available"
 	PEER_UNAVAILABLE = "unavailable"
-	PEER_BUSY = "busy"
+	PEER_BUSY        = "busy"
 )
 
 type RoomRaw struct {
-	ID int				`redis:"id"`
-	OwnerID int 		`redis:"ownerID"`
-	Name string 		`redis:"name"`
-	CreationTime int64 	`redis:"creationTime"`
-	LastUpdateTime int64`redis:"lastUpdateTime"`
-	Password string 	`redis:"password"`
-	IsPrivate bool		`redis:"isPrivate"`
-	Members int			`redis:"members"`
-	Hash string			`redis:"hash"`
-	Description string  `redis:"description"`
+	ID             int    `redis:"id"`
+	OwnerID        int    `redis:"ownerID"`
+	Name           string `redis:"name"`
+	CreationTime   int64  `redis:"creationTime"`
+	LastUpdateTime int64  `redis:"lastUpdateTime"`
+	Password       string `redis:"password"`
+	IsPrivate      bool   `redis:"isPrivate"`
+	Members        int    `redis:"members"`
+	Hash           string `redis:"hash"`
+	Description    string `redis:"description"`
 }
 
 type Room struct {
-	ID int
-	hash string
+	ID    int
+	hash  string
 	peers map[*Peer]bool
 
 	broadcastChan chan *Packet
 
-	registerChan chan  *Peer
+	registerChan   chan *Peer
 	unregisterChan chan *Peer
 
 	time int
 }
 
 type Peer struct {
-	ID int
+	ID     int
 	roomID int
 
 	// Chan for send message
@@ -54,17 +55,17 @@ type Peer struct {
 
 type Packet struct {
 	ExludePeer map[int]bool
-	Payload []byte
+	Payload    []byte
 }
 
 type Message struct {
-	ID int64		`json:"id"`
+	ID       int64  `json:"id"`
 	Username string `json:"username"`
-	Time string		`json:"time"`
-	Content string	`json:"content"`
+	Time     string `json:"time"`
+	Content  string `json:"content"`
 }
 
-const(
+const (
 	TAB_LOBBY = "TAB_LOBBY"
 	TAB_ROOM  = "TAB_ROOM"
 	TAB_PEER  = "TAB_PEER"
@@ -75,15 +76,14 @@ var rooms = make(map[int]*Room)
 
 func NewRoom(roomID int) *Room {
 	db := rdbPool.Get()
-	defer  db.Close()
-
+	defer db.Close()
 
 	rooms[roomID] = &Room{
-		ID : roomID,
+		ID: roomID,
 
-		broadcastChan:make(chan *Packet),
-		registerChan: make(chan *Peer),
-		unregisterChan:make(chan *Peer),
+		broadcastChan:  make(chan *Packet),
+		registerChan:   make(chan *Peer),
+		unregisterChan: make(chan *Peer),
 
 		peers: make(map[*Peer]bool),
 
@@ -106,24 +106,23 @@ func (r *Room) run() {
 			}
 
 		// peer left room
-		case peer, ok := <- r.unregisterChan:
+		case peer, ok := <-r.unregisterChan:
 			if ok {
 				delete(r.peers, peer)
 			}
 
 		// fanout the message to peers
-		case packet, ok := <- r.broadcastChan:
+		case packet, ok := <-r.broadcastChan:
 			if ok {
 				for peer := range r.peers {
 					exclude := packet.ExludePeer
-					if (exclude != nil && exclude[peer.ID]) {
+					if exclude != nil && exclude[peer.ID] {
 						continue
 					}
 
 					select {
 					// write message to peer's send channel
 					case peer.sendChan <- packet.Payload:
-
 
 					}
 				}
@@ -139,7 +138,7 @@ func (r *Room) broadcastPacket(packet *Packet) {
 }
 
 // ------------------- Peer Methods ----------------------//
-func (p *Peer) write(messageType int, payload []byte) error{
+func (p *Peer) write(messageType int, payload []byte) error {
 	return p.ws.WriteMessage(messageType, payload)
 }
 
@@ -166,7 +165,9 @@ func (p *Peer) talk() {
 
 	for {
 		_, message, err := p.ws.ReadMessage()
-		if err != nil { break }
+		if err != nil {
+			break
+		}
 
 		p.processMessage1(message)
 	}
@@ -177,7 +178,7 @@ func (p *Peer) processMessage1(message []byte) {
 
 	var packet = &Packet{
 		Payload: message,
-//		ExludePeer: map[string]bool{p.ID:true},
+		//		ExludePeer: map[string]bool{p.ID:true},
 	}
 
 	room := rooms[p.roomID]
@@ -187,8 +188,8 @@ func (p *Peer) processMessage1(message []byte) {
 
 func (p *Peer) processMessage(message []byte) {
 
-	data := struct{
-		Action int `json:"a"`
+	data := struct {
+		Action  int    `json:"a"`
 		Message string `json:"m"`
 	}{}
 	s := string(message[:])
@@ -201,18 +202,18 @@ func (p *Peer) processMessage(message []byte) {
 
 	switch int(data.Action) {
 	case TypeMessage:
-		if (len(data.Message) == 0) {
+		if len(data.Message) == 0 {
 			return
 		}
 
 		room, exists := rooms[p.roomID]
 		if exists {
-			content := struct{
-				Action int 		`json:"a"`
-				PeerID int	 	`json:"p"`
-				Message string 	`json:"m"`
-				Time int64		`json:"t"`
-			} {
+			content := struct {
+				Action  int    `json:"a"`
+				PeerID  int    `json:"p"`
+				Message string `json:"m"`
+				Time    int64  `json:"t"`
+			}{
 				TypeMessage,
 				p.ID,
 				data.Message,
@@ -225,18 +226,17 @@ func (p *Peer) processMessage(message []byte) {
 				return
 			}
 			var packet = &Packet{
-				Payload: payload,
-				ExludePeer: map[int]bool{p.ID:true},
+				Payload:    payload,
+				ExludePeer: map[int]bool{p.ID: true},
 			}
 			room.broadcastPacket(packet)
 		}
 	}
 }
 
-
 func getRoomID2NameMap(userID int) (*[]interface{}, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	// get user's room id
 	var roomID []int
@@ -246,15 +246,15 @@ func getRoomID2NameMap(userID int) (*[]interface{}, error) {
 		return nil, err
 	}
 
-	var ID2Name = make([]interface{},len(roomID))
+	var ID2Name = make([]interface{}, len(roomID))
 
 	// get room name
 	for i, id := range roomID {
 		roomName, _ := redis.String(db.HGET(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(id)), "name"))
-		ID2Name[i] = struct{
-			ID int
+		ID2Name[i] = struct {
+			ID   int
 			Name string
-		}{ ID: id, Name: roomName}
+		}{ID: id, Name: roomName}
 	}
 
 	return &ID2Name, nil
@@ -262,9 +262,9 @@ func getRoomID2NameMap(userID int) (*[]interface{}, error) {
 
 func saveRoomRaw(roomRaw *RoomRaw) (int, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
-	nextRoomID, _:= db.INCRBY(genRedisKey(ROOM_NEXT_ID_PRE, ""), 1)
+	nextRoomID, _ := db.INCRBY(genRedisKey(ROOM_NEXT_ID_PRE, ""), 1)
 	roomID := int(nextRoomID)
 
 	err := db.HMSET(genRedisKey(ROOM_CACHE_PRE, strconv.FormatInt(nextRoomID, 10)),
@@ -298,7 +298,7 @@ func saveRoomRaw(roomRaw *RoomRaw) (int, error) {
 
 func getNewRoomIDs(offset, limit int) ([]int, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	var out []int
 	err := db.ZREVRANGE(&out, genRedisKey(ROOM_ID_INDEX_PRE, ""), offset, offset+limit-1)
@@ -311,7 +311,7 @@ func getNewRoomIDs(offset, limit int) ([]int, error) {
 
 func getRoomRaw(roomID int) (*RoomRaw, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	roomRaw := &RoomRaw{}
 	db.HGETALL(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(roomID)), roomRaw)
@@ -320,7 +320,7 @@ func getRoomRaw(roomID int) (*RoomRaw, error) {
 
 func peerJoinRoom(userID, roomID int) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	roomIDStr := strconv.Itoa(roomID)
 
@@ -356,7 +356,7 @@ func peerJoinRoom(userID, roomID int) (bool, error) {
 
 func peerLeaveRoom(userID, roomID int) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	roomIDstr := strconv.Itoa(roomID)
 
@@ -370,10 +370,9 @@ func peerLeaveRoom(userID, roomID int) (bool, error) {
 	}
 
 	// remove peer from room's peer list
-	if _, err := db.ZADD(genRedisKey(ROOM_PEER_PRE,roomIDstr), userID); err != nil {
+	if _, err := db.ZADD(genRedisKey(ROOM_PEER_PRE, roomIDstr), userID); err != nil {
 		return false, err
 	}
-
 
 	// decrease the room member
 	if _, err := db.HINCRBY(genRedisKey(ROOM_CACHE_PRE, roomIDstr), "members", -1); err != nil {
@@ -385,7 +384,7 @@ func peerLeaveRoom(userID, roomID int) (bool, error) {
 
 func peerInRoom(userID, roomID int) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	if exists, _ := roomExists(roomID); !exists {
 		return false, errors.New("room not exists")
@@ -404,7 +403,7 @@ func peerInRoom(userID, roomID int) (bool, error) {
 
 func getPeerIDofRoom(roomID int) (*[]int, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	var peerID []int
 	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
@@ -416,13 +415,13 @@ func getPeerIDofRoom(roomID int) (*[]int, error) {
 
 func roomExists(roomID int) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 	return db.EXISTS(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(roomID)))
 }
 
-func saveMessage(username string, roomID int, content string) (bool, error)  {
+func saveMessage(username string, roomID int, content string) (bool, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	roomIDStr := strconv.Itoa(roomID)
 
@@ -432,18 +431,18 @@ func saveMessage(username string, roomID int, content string) (bool, error)  {
 	}
 
 	message := &Message{
-		ID: nextMsgID,
+		ID:       nextMsgID,
 		Username: username,
-		Content: content,
-		Time: time.Now().Format(TIME_LAYOUT),
+		Content:  content,
+		Time:     time.Now().Format(TIME_LAYOUT),
 	}
 
-	messageB, err := json.Marshal(message);
+	messageB, err := json.Marshal(message)
 	if err != nil {
 		return false, err
 	}
 
-	if _ , err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), nextMsgID, string(messageB)); err != nil {
+	if _, err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), nextMsgID, string(messageB)); err != nil {
 		return false, err
 	}
 
@@ -452,11 +451,13 @@ func saveMessage(username string, roomID int, content string) (bool, error)  {
 
 func getMessages(roomID int, lastID int64, limit int64) (*[]Message, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	// get id
 	startID := lastID - limit
-	if startID <= 0 { startID = 0 }
+	if startID <= 0 {
+		startID = 0
+	}
 
 	var rawMsg []string
 	err := db.ZREVRANGEBYSCORE(&rawMsg, genRedisKey(ROOM_MSG_CACHE_PRE, strconv.Itoa(roomID)),
@@ -476,7 +477,7 @@ func getMessages(roomID int, lastID int64, limit int64) (*[]Message, error) {
 
 func getMaxMessageID(roomID int) (int64, error) {
 	db := rdbPool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	return redis.Int64(db.GET(genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID))))
 }
