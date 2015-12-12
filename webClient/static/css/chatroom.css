@@ -14,6 +14,7 @@
 
 .chat-room {
     height: 890px;
+
 }
 
 .chat-room .left-side {
@@ -24,6 +25,13 @@
     width: 70%;
 }
 
+
+.message_time {
+    display: inline;
+    font-weight: 300;
+    margin-top: 0;
+    color: #c3c3c3;
+}
 
 .chat-room .right-side {
     width: 15%;
@@ -99,6 +107,13 @@
 
 }
 
-.registration1 {
-    padding-bottom: 10px;
+.chat-loading {
+    max-width: 210px;
+    margin: 100px auto 0;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+.hidden-block {
+    display: none;
 }

@@ -101,9 +101,12 @@ a, a:hover, a:focus {
 }
 
 .form-signin .btn-login {
+    background: #f67a6e;
+    color: #fff;
     text-transform: uppercase;
     font-weight: 300;
     font-family: 'Open Sans', sans-serif;
+    box-shadow: 0 4px #e56b60;
     margin-bottom: 20px;
 }
 
@@ -472,6 +475,16 @@ ul.top-menu > li > a:hover, ul.top-menu > li > a:focus {
 }
 
 .dropdown-menu.extended li a:hover {
+    background-color: #F7F8F9 !important;
+    color: #2E2E2E;
+}
+
+.dropdown-menu.extendopup li a {
+    width: 100%;
+    display: inline-block;
+}
+
+.dropdown-menu.extendopup li a:hover {
     background-color: #F7F8F9 !important;
     color: #2E2E2E;
 }
@@ -2585,6 +2598,14 @@ ul.summary-list > li:last-child  {
     font-size: 16px;
 }
 
+.activity .profile_photo {
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    float: left
+}
+
 .activity.terques span {
     background: #8dd7d6;
 }
@@ -3858,7 +3879,7 @@ table.sliders tr td {
 /*Timeline chat*/
 
 .chat-form {
-    margin-top: 25px;
+    margin-top: 10px;
     clear: both;
 }
 
@@ -5147,6 +5168,7 @@ tr.odd.gradeX td.sorting_1, tr.even.gradeX td.sorting_1, table.display tr.even.g
     table-layout: fixed;
     width: 100%;
     position: relative;
+    height: 890px;
 }
 
 
@@ -5159,19 +5181,19 @@ tr.odd.gradeX td.sorting_1, tr.even.gradeX td.sorting_1, table.display tr.even.g
 }
 
 .chat-room .left-side {
-    width: 25%;
+    width: 15%;
     background: #e5e8ef;
     border-radius: 4px 0 0 4px;
     -webkit-border-radius: 4px 0 0 4px;
 }
 .chat-room .mid-side {
-    width: 50%;
+    width: 70%;
     background: #fff;
     border-right: 1px solid #e5e8ef;
 }
 
 .chat-room .right-side {
-    width: 25%;
+    width: 15%;
     background: #fff;
     border-radius: 0 4px 4px 0;
     -webkit-border-radius: 0 4px 4px 0;
@@ -5321,11 +5343,40 @@ ul.chat-user li a:hover{
     bottom: 0;
 }
 
+.chat-room .left-side .footer {
+    background: #d5d7de;
+    border-radius: 0 0 0 4px;
+    /*-webkit-border-radius: 0 0 0 4px;*/
+    padding: 15px;
+    height: 70px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+.chat-room .mid-side .message-list {
+    height: 650px;
+    overflow-y:auto;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
 .chat-room .mid-side footer {
     background: #f6f6f6;
     padding: 15px;
     height: 70px;
     width: 50%;
+    position: absolute;
+    bottom: 0;
+    border-right: 1px solid #E5E8EF;
+}
+
+
+.chat-room .mid-side .footer {
+    background: #f6f6f6;
+    padding-bottom: 1px;
+    width: 100%;
+    height: 130px;
     position: absolute;
     bottom: 0;
     border-right: 1px solid #E5E8EF;
@@ -5338,6 +5389,18 @@ ul.chat-user li a:hover{
     width: 25%;
     position: absolute;
     bottom: 0;
+    border-top: 1px solid #E5E8EF;
+    border-radius: 0 0 4px 0;
+    -webkit-border-radius: 0 0 4px 0;
+}
+
+.chat-room .right-side .footer {
+    background: #fff;
+    padding: 15px;
+    height: 70px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     border-top: 1px solid #E5E8EF;
     border-radius: 0 0 4px 0;
     -webkit-border-radius: 0 0 4px 0;
@@ -5360,6 +5423,31 @@ ul.chat-user li a:hover{
 }
 
 .chat-room .left-side footer a.chat-dropdown {
+    background: #96979a;
+    border-radius: 2px;
+    color: #fff;
+    font-size: 10px;
+    margin-top: 10px;
+    padding: 3px 5px;
+}
+
+.chat-room .left-side .footer .chat-avatar img {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #fff;
+    float: left;
+}
+
+.chat-room .left-side .footer .user-status {
+    float: left;
+    margin: 10px;
+}
+
+.chat-room .left-side .footer .user-status i {
+    padding-right: 5px;
+}
+
+.chat-room .left-side .footer a.chat-dropdown {
     background: #96979a;
     border-radius: 2px;
     color: #fff;
@@ -5506,7 +5594,7 @@ a.guest-on i {
 
 .chat-txt {
     float: left;
-    width: 70%;
+    width: 100%;
     margin-right: 5px;
 }
 

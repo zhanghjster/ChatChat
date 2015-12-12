@@ -1,17 +1,24 @@
 package main
 
 import (
+	"errors"
 	"github.com/garyburd/redigo/redis"
 	"time"
-	"errors"
-	"log"
 )
 
 const (
-	SESSION_CACHE_PRE = "CCsession:"
-	USER_CACHE_PRE = "CCuser:"
-	USER_ID2NAME_PRE = "CCuserid:"
-	USER_NEXT_ID_PRE = "CCnext_user_id"
+	SESSION_CACHE_PRE    = "CCs:"
+	USER_CACHE_PRE       = "CCu:"
+	USER_NAME2ID_PRE     = "CCun2i:"
+	USER_NEXT_ID_PRE     = "CCnext_user_id"
+	CURRENT_TAB_PRE      = "CCct:"
+	ROOM_NEXT_ID_PRE     = "CCnext_room_id"
+	ROOM_CACHE_PRE       = "CCr:"
+	PEER_ROOM_PRE        = "CCPR:"
+	ROOM_PEER_PRE        = "CCRP:"
+	ROOM_ID_INDEX_PRE    = "CCRI"
+	ROOM_NEXT_MSG_ID_PRE = "CCrnmi:"
+	ROOM_MSG_CACHE_PRE   = "CCrmc:"
 )
 
 type RDBpool struct {
@@ -26,7 +33,7 @@ type RDB struct {
 func NewRDBpool(address string) *RDBpool {
 	pool := redis.Pool{
 		MaxActive: 0,
-		MaxIdle: 3,
+		MaxIdle:   3,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.DialTimeout(
 				"tcp",
@@ -45,7 +52,7 @@ func NewRDBpool(address string) *RDBpool {
 	return &RDBpool{pool: pool}
 }
 
-func gen_key(pre, id string) string {
+func genRedisKey(pre, id string) string {
 	if id == "" {
 		return pre
 	}
@@ -71,7 +78,7 @@ func (db *RDB) INCRBY(k string, i int) (int64, error) {
 
 // DEL key
 func (db *RDB) DEL(keys ...interface{}) (int, error) {
-	n , err := redis.Int(db.conn.Do("DEL", keys...))
+	n, err := redis.Int(db.conn.Do("DEL", keys...))
 	return n, err
 }
 
@@ -89,24 +96,63 @@ func (db *RDB) GET(k string) (interface{}, error) {
 		return nil, errors.New("fail to get " + k)
 	}
 
-	return value, nil;
+	return value, nil
 }
 
 // HGET key filed
 func (db *RDB) HGET(k, f string) (interface{}, error) {
-	value, err := db.conn.Do("HGET", k, f);
+	return db.conn.Do("HGET", k, f)
+
+}
+
+// ZADD key s1 m1 s2 m2 ....
+func (db *RDB) ZADD(args ...interface{}) (int, error) {
+	r, err := redis.Int(db.conn.Do("ZADD", args...))
+	return r, err
+}
+
+// ZREM m1 m2 ...
+func (db *RDB) ZREM(args ...interface{}) error {
+	_, err := db.conn.Do("ZREM", args...)
+	return err
+}
+
+// ZRANGE k offset limit
+func (db *RDB) ZRANGE(out interface{}, args ...interface{}) error {
+	values, err := redis.Values(db.conn.Do("ZRANGE", args...))
+	redis.ScanSlice(values, out)
+	return err
+}
+
+// ZREVRANGE k offset limit
+func (db *RDB) ZREVRANGE(out interface{}, args ...interface{}) error {
+	values, err := redis.Values(db.conn.Do("ZREVRANGE", args...))
+	redis.ScanSlice(values, out)
+	return err
+}
+
+// ZREVRANGEBYSCORE k offset limit
+func (db *RDB) ZREVRANGEBYSCORE(out interface{}, args ...interface{}) error {
+	values, err := redis.Values(db.conn.Do("ZREVRANGEBYSCORE", args...))
+	redis.ScanSlice(values, out)
+	return err
+}
+
+// ZRANK k
+func (db *RDB) ZRANK(k string, m interface{}) (int, error) {
+	r, err := redis.Int(db.conn.Do("ZRANK", k, m))
+
 	if err != nil {
-		return nil, errors.New("failt to get " + k + " " + f)
+		return 0, err
 	}
-	return value, nil
 
-
+	return r, nil
 }
 
 //EXPIRE k timeInSeconds
 func (db *RDB) EXPIRE(k string, expire int) error {
 	_, err := db.conn.Do("EXPIRE", k, expire)
-	return  err
+	return err
 }
 
 // EXISTS key
@@ -134,8 +180,6 @@ func (db *RDB) HGETALL(key string, out interface{}) (bool, error) {
 		return false, errors.New("Failed to load from DB")
 	}
 
-	log.Print(res)
-
 	// No such entry.
 	if len(res) == 0 {
 		return false, nil
@@ -144,6 +188,12 @@ func (db *RDB) HGETALL(key string, out interface{}) (bool, error) {
 	redis.ScanStruct(res, out)
 
 	return true, nil
+}
+
+// HINCRBY key field increment
+func (db *RDB) HINCRBY(args ...interface{}) (int, error) {
+	res, err := redis.Int(db.conn.Do("HINCRBY", args...))
+	return res, err
 }
 
 // Close the connection

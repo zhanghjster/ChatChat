@@ -1,10 +1,11 @@
 webpackJsonp([4],{
 
-/***/ 279:
+/***/ 267:
 /***/ function(module, exports, __webpack_require__) {
 
-	/** Created by ben on 15/11/18. **/
-
+	/**
+	 * Created by ben on 15/12/3.
+	 */
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
@@ -25,38 +26,41 @@ webpackJsonp([4],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(216);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(158);
+	var _reactRedux = __webpack_require__(222);
 
-	var _reduxRouter = __webpack_require__(235);
+	var _actions = __webpack_require__(264);
 
-	var Home = (function (_React$Component) {
-	    _inherits(Home, _React$Component);
+	var Logout = (function (_React$Component) {
+	    _inherits(Logout, _React$Component);
 
-	    function Home() {
-	        _classCallCheck(this, Home);
+	    function Logout() {
+	        _classCallCheck(this, Logout);
 
-	        _get(Object.getPrototypeOf(Home.prototype), 'constructor', this).apply(this, arguments);
+	        _get(Object.getPrototypeOf(Logout.prototype), 'constructor', this).apply(this, arguments);
 	    }
 
-	    _createClass(Home, [{
+	    _createClass(Logout, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.props.dispatch((0, _actions.logout)());
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
-	            return _react2['default'].createElement(
-	                'div',
-	                null,
-	                'Chat page'
-	            );
+	            return _react2['default'].createElement('div', null);
 	        }
 	    }]);
 
-	    return Home;
+	    return Logout;
 	})(_react2['default'].Component);
 
-	exports['default'] = Home;
+	exports['default'] = (0, _reactRedux.connect)(function (state) {
+	    return { state: state };
+	})(Logout);
 	module.exports = exports['default'];
 
 /***/ }

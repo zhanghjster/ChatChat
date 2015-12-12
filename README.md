@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # how to build
 ```
 export GOPATH=~/go #设置GOPATH为合适的值
@@ -31,3 +32,43 @@ go build
 >webclient 那里是react + react-router + redux, 用webpack打包编译
 >Benx(23881302) 17:47:08 
 >server那里是 go-gin
+=======
+ChatChat
+--------
+
+Project for my learning stuff
+
+### Setup DEV ###
+
+
+1. Setup Docker (Max OS X)
+
+	1. Follow the instructions at http://docs.docker.com/installation/mac/
+	2. Start a docker host by `Docker Quick Start Terminal`
+	3. Get the IP address of your docker host  
+		`docker-machine ip default`
+	4. Add a line to your /etc/hosts that goes `<Docker IP> dockerhost`
+	5. Run `docker-machine env devault` and copy the export statements to your ~/.bash_profile
+
+2. Go
+
+
+		cd server/
+      	go install 
+   
+2. webClient
+
+		cd webClient/react
+		npm install
+		
+3. DB
+		
+		cd docker/
+		make run
+		
+	
+4. ? 
+	
+		
+		
+>>>>>>> 8132351d0d03d27debf1ed39abf380ed7fcdd4ec

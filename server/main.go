@@ -1,27 +1,31 @@
 package main
+
 import (
 	"github.com/gorilla/websocket"
 	"net/http"
 )
 
 func main() {
-	HttpServer := NewHTTPServer(3000)
-	HttpServer.Serve();
+	serve()
 }
 
 var (
-	rdbPool *RDBpool
+	configure      *Configure
+	rdbPool        *RDBpool
 	sessionManager *SessionManager
-	upgrader websocket.Upgrader
+	upgrader       websocket.Upgrader
 )
 
 func init() {
-	rdbPool = NewRDBpool("dockerhost:6379")
+
+	configure = LoadConfigure()
+
+	rdbPool = NewRDBpool(configure.Redis.Host)
 	sessionManager, _ = NewSessionManager("chatchat", 100000)
 
 	upgrader = websocket.Upgrader{
-		ReadBufferSize: 4096,
+		ReadBufferSize:  4096,
 		WriteBufferSize: 4096,
-		CheckOrigin: func(r *http.Request) bool { return true },
+		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
 }

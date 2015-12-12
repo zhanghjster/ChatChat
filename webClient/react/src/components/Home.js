@@ -1,13 +1,24 @@
 /**
  * Created by Ben on 15/11/20.
  */
-/** Created by ben on 15/11/18. **/
-
 import React, { PropTypes } from 'react';
-export default class Home extends React.Component {
+import {authCheck} from "../utils";
+import {connect} from "react-redux";
+
+class Home extends React.Component {
+    componentWillMount () {
+        authCheck(this.props.auth.isAuthenticated, '/login', "/chat");
+    }
+
+    componentWillReceiveProps() {
+        authCheck(this.props.auth.isAuthenticated, '/login', "/chat");
+    }
+
     render() {
         return <div></div>;
     }
 }
+
+export default connect(state => { return {auth : state.auth }})(Home)
 
 

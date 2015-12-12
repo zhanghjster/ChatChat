@@ -61,7 +61,9 @@ export default createReducer(initialState, {
             'signupError': null,
             'isAuthenticating': false,
         })
+    },
+
+    [LOGOUT]: (state) => {
+        return Object.assign({}, state, initialState);
     }
-
-
 });

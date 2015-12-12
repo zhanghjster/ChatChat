@@ -47,13 +47,27 @@ function requireAuth(Component) {
 
 const routeConfig = [
     {
+        path: "/",
         componet: require('../components/APP'),
+        indexRoute: { getComponent: (location, cb) => {
+            require.ensure([], (require) => {
+                cb(null, require('components/Home'))
+            })
+        } },
         childRoutes: [
             {
                 path: '/login',
                 getComponent: (location, cb) => {
                     require.ensure([], (require) => {
                         cb(null, require('components/Login'))
+                    })
+                }
+            },
+            {
+                path: '/logout',
+                getComponent: (location, cb) => {
+                    require.ensure([], (require) => {
+                        cb(null, require('components/Logout'))
                     })
                 }
             },
@@ -70,13 +84,6 @@ const routeConfig = [
                         cb(null, require('components/Chat'))
                     })
                 }
-            },
-            { path: '/',
-                getComponent: (location, cb) => {
-                    require.ensure([], (require) => {
-                        cb(null, requireAuth(require('components/Home')))
-                    })
-                }
             }
         ]
     }
@@ -85,16 +92,3 @@ const routeConfig = [
 export default (
     <Router routes={routeConfig} history={history}/>
 );
-
-/*
-export default(
-    <Router history={history}>
-        <Route path='/' component={APP}>
-            <IndexRoute component={Home}/>
-            <Route path="login" component={Login}/>
-            <Route path="signup" component={Signup}/>
-            <Route path="chat" component={Chat}/>
-        </Route>
-    </Router>
-);
-*/

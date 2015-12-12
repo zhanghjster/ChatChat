@@ -1,5 +1,5 @@
 /**
- * Created by ben on 15/11/15.
+ * Created by ben on 15/12/3.
  */
 import createBrowserHistory from 'history/lib/createBrowserHistory';
-export default createBrowserHistory()
+export default createBrowserHistory();

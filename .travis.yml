@@ -3,14 +3,34 @@ go:
  - 1.5.2
  - release
 
+<<<<<<< HEAD
+=======
+services:
+  - redis-server
+
+before_install:
+  - nvm install 5.1.1
+
+>>>>>>> 8132351d0d03d27debf1ed39abf380ed7fcdd4ec
 install:
   - go get github.com/gorilla/websocket
   - go get github.com/garyburd/redigo/redis
   - go get github.com/dgrijalva/jwt-go
   - go get github.com/gin-gonic/gin
+<<<<<<< HEAD
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
  - cd server
  - go build
+=======
+  - go get github.com/BurntSushi/toml
+  - go get github.com/stretchr/testify/assert
+  - cd webClient/react && npm install
+  #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
+
+script:
+ - cd $TRAVIS_BUILD_DIR/server && go test
+ 
+>>>>>>> 8132351d0d03d27debf1ed39abf380ed7fcdd4ec
 

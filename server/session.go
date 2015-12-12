@@ -1,14 +1,14 @@
 package main
+
 import (
 	"github.com/garyburd/redigo/redis"
 	"log"
-"net/http"
+	"net/http"
 	"net/url"
 )
 
-
 type SessionManager struct {
-	dbpool *RDBpool
+	dbpool      *RDBpool
 	sessionName string
 	maxlifetime int
 }
@@ -17,13 +17,13 @@ func NewSessionManager(sname string, ml int) (*SessionManager, error) {
 	return &SessionManager{
 		sessionName: sname,
 		maxlifetime: ml,
-		dbpool: rdbPool,
+		dbpool:      rdbPool,
 	}, nil
 }
 
 func (sm *SessionManager) SaveToCache(session *Session) {
 	db := sm.dbpool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	key := SESSION_CACHE_PRE + session.username
 	db.SET(key, session.sid)
@@ -37,7 +37,7 @@ func (sm *SessionManager) SaveToCache(session *Session) {
 
 func (sm *SessionManager) DeleteSession(session *Session) {
 	db := sm.dbpool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	key := SESSION_CACHE_PRE + session.username
 	db.DEL(key)
@@ -46,20 +46,19 @@ func (sm *SessionManager) DeleteSession(session *Session) {
 func (sm *SessionManager) InitSession(sid, username string) *Session {
 	log.Println("username " + username)
 	return &Session{
-		sid: sid,
+		sid:      sid,
 		username: username,
 	}
 }
 
 func (sm *SessionManager) StartSession(w http.ResponseWriter, username string) *Session {
-	sid := sm.NewSessionID();
+	sid := sm.NewSessionID()
 	session := sessionManager.InitSession(sid, username)
 
-
 	cookie := http.Cookie{
-		Name: sessionManager.sessionName,
-		Value: url.QueryEscape(sid + "-" + username),
-		Path: "/",
+		Name:     sessionManager.sessionName,
+		Value:    url.QueryEscape(sid + "-" + username),
+		Path:     "/",
 		HttpOnly: true,
 	}
 
@@ -73,13 +72,13 @@ func (sm *SessionManager) StartSession(w http.ResponseWriter, username string) *
 
 func (sm *SessionManager) ReadSession(username string) *Session {
 	db := sm.dbpool.Get()
-	defer  db.Close()
+	defer db.Close()
 
 	sid, _ := redis.String(db.GET(SESSION_CACHE_PRE + username))
 
 	if username != "" {
 		return &Session{
-			sid : sid,
+			sid:      sid,
 			username: username,
 		}
 	}
@@ -87,16 +86,13 @@ func (sm *SessionManager) ReadSession(username string) *Session {
 	return nil
 }
 
-
 func (sm *SessionManager) NewSessionID() string {
-	return GUID(32);
+	return GUID(32)
 }
 
 type Session struct {
-	sid string
-	username string
+	sid        string
+	username   string
 	createTime int
-	lifetime int
+	lifetime   int
 }
-
-

@@ -1,2 +1,4 @@
 .idea/*
 server/server
+conf/server.cfg
+static/*
