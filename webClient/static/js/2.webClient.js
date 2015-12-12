@@ -1,6 +1,6 @@
 webpackJsonp([2],{
 
-/***/ 260:
+/***/ 262:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26,9 +26,9 @@ webpackJsonp([2],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _utils = __webpack_require__(261);
+	var _utils = __webpack_require__(263);
 
-	var _reactRedux = __webpack_require__(222);
+	var _reactRedux = __webpack_require__(216);
 
 	var Home = (function (_React$Component) {
 	    _inherits(Home, _React$Component);
