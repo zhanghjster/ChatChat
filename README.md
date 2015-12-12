@@ -13,7 +13,7 @@ Project for my learning stuff
 	3. Get the IP address of your docker host  
 		`docker-machine ip default`
 	4. Add a line to your /etc/hosts that goes `<Docker IP> dockerhost`
-	5. Run `docker-machine env devault` and copy the export statements to your ~/.bash_profile
+	5. Run `docker-machine env default` and copy the export statements to your ~/.bash_profile
 
 2. Go
 
