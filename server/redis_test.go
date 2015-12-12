@@ -9,10 +9,8 @@ import (
 	"strconv"
 )
 
-var testDBpool = NewRDBpool("dockerhost:6379")
-
 func TestRDBconnection(t *testing.T) {
-	db := testDBpool.Get()
+	db := rdbPool.Get()
 	defer db.Close()
 
 	assert.Nil(t, db.conn.Err())
@@ -23,7 +21,7 @@ func TestHMSETandHGETALL(t *testing.T) {
 
 	assert := assert.New(t)
 
-	db := testDBpool.Get()
+	db := rdbPool.Get()
 	defer db.Close()
 
 	err := db.HMSET("st", "age", 40, "name", "Benx")
@@ -49,7 +47,7 @@ func TestHMSETandHGETALL(t *testing.T) {
 }
 
 func TestSETandGET(t *testing.T) {
-	db := testDBpool.Get()
+	db := rdbPool.Get()
 	defer db.Close()
 
 	db.SET("benben", 1)
@@ -64,7 +62,7 @@ func TestSETandGET(t *testing.T) {
 }
 
 func TestINCRYBY(t *testing.T) {
-	db := testDBpool.Get()
+	db := rdbPool.Get()
 	defer db.Close()
 
 	next_id, err := db.INCRBY("test_next_id", 1)
