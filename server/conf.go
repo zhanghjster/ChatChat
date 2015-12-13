@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"os"
 )
 
 type redisConf struct {
@@ -18,7 +19,14 @@ type Configure struct {
 	Http  httpConf
 }
 
-func LoadConfigure(file string) *Configure {
+func LoadConfigure() *Configure {
+
+	var file = "../conf/server.cfg"
+	var default_file = "../conf/server_default.cfg"
+
+	if _, err := os.Stat(file); err != nil {
+		file = default_file
+	}
 
 	var config = Configure{}
 
