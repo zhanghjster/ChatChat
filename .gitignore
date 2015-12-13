@@ -1,3 +1,4 @@
 .idea/*
 server/server
+server/server.test
 conf/server.cfg
