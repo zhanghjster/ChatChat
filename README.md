@@ -1,5 +1,6 @@
 ChatChat
 --------
+[![Build Status](https://api.travis-ci.org/zhanghjster/ChatChat.svg)](https://travis-ci.org/zhanghjster/ChatChat)
 
 Project for my learning stuff
 
