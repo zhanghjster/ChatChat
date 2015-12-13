@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -22,7 +21,6 @@ func TestCreateToken(t *testing.T) {
 	tokenString, err := token.SignedString(secret)
 
 	assert.Nil(err)
-	fmt.Println("Token:", tokenString)
 
 	// parse and verify
 	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -31,6 +29,5 @@ func TestCreateToken(t *testing.T) {
 
 	assert.True(err == nil && token.Valid)
 
-	fmt.Println("username:", token.Claims["username"].(string))
 	assert.Equal(username, token.Claims["username"].(string))
 }
