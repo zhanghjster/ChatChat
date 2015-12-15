@@ -13,20 +13,18 @@ if (token != null) {
     store.dispatch(loginSuccess(token));
 }
 
-let debugPannel = null;
 if ( __DEV__ ) {
-    const { DevTools, DebugPanel, LogMonitor } = require('redux-devtools/lib/react');
-    debugPannel = (<DebugPanel top right bottom><DevTools store={store} monitor={LogMonitor} /></DebugPanel>);
+    let ReduxDevTool  = require('./components/ReduxDevTool');
     ReactDOM.render(
         <div classNmae='container'>
             <div  className="row">
-                <div className="col-md-10">
+                <div className="col-sm-12">
                     <Provider store={store}>
                         {routes}
                     </Provider>
                 </div>
-                <div className="col-md-2">{ debugPannel }</div>
             </div>
+            <ReduxDevTool store={store}></ReduxDevTool>
         </div>
         ,
         document.getElementById("APP")
