@@ -1,5 +1,5 @@
 .idea/*
-
+node_modules
 server/server
 conf/server.cfg
 webClient/static/js
