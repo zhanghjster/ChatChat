@@ -1,10 +1,6 @@
 webpackJsonp([6,2,3,4,5],{
 
-<<<<<<< HEAD
 /***/ 258:
-=======
-/***/ 262:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -30,15 +26,9 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _utils = __webpack_require__(259);
 
 	var _reactRedux = __webpack_require__(220);
-=======
-	var _utils = __webpack_require__(263);
-
-	var _reactRedux = __webpack_require__(216);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Home = (function (_React$Component) {
 	    _inherits(Home, _React$Component);
@@ -76,11 +66,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 261:
-=======
-/***/ 265:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -106,25 +92,15 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(157);
+	var _reactRouter = __webpack_require__(158);
 
-<<<<<<< HEAD
 	var _reactRedux = __webpack_require__(220);
 
 	var _actions = __webpack_require__(262);
-=======
-	var _reactRedux = __webpack_require__(216);
-
-	var _actions = __webpack_require__(266);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Login = (function (_React$Component) {
 	    _inherits(Login, _React$Component);
@@ -240,11 +216,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 265:
-=======
-/***/ 269:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -270,7 +242,6 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -278,15 +249,6 @@ webpackJsonp([6,2,3,4,5],{
 	var _reactRedux = __webpack_require__(220);
 
 	var _actions = __webpack_require__(262);
-=======
-	var _reactDom = __webpack_require__(215);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactRedux = __webpack_require__(216);
-
-	var _actions = __webpack_require__(266);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Logout = (function (_React$Component) {
 	    _inherits(Logout, _React$Component);
@@ -319,11 +281,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 266:
-=======
-/***/ 270:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -349,7 +307,6 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -357,15 +314,6 @@ webpackJsonp([6,2,3,4,5],{
 	var _reactRedux = __webpack_require__(220);
 
 	var _actions = __webpack_require__(262);
-=======
-	var _reactDom = __webpack_require__(215);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactRedux = __webpack_require__(216);
-
-	var _actions = __webpack_require__(266);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Signup = (function (_React$Component) {
 	    _inherits(Signup, _React$Component);
@@ -453,11 +401,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 267:
-=======
-/***/ 271:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/** Created by ben on 15/11/18. **/
@@ -481,7 +425,6 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -499,25 +442,6 @@ webpackJsonp([6,2,3,4,5],{
 	var _utils = __webpack_require__(259);
 
 	var _constants = __webpack_require__(264);
-=======
-	var _reactDom = __webpack_require__(215);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactRedux = __webpack_require__(216);
-
-	var _actions = __webpack_require__(266);
-
-	var _utilsHistoryJs = __webpack_require__(247);
-
-	var _utilsHistoryJs2 = _interopRequireDefault(_utilsHistoryJs);
-
-	var _index = __webpack_require__(272);
-
-	var _utils = __webpack_require__(263);
-
-	var _constants = __webpack_require__(268);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Chat = (function (_React$Component) {
 	    _inherits(Chat, _React$Component);
@@ -606,11 +530,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 268:
-=======
-/***/ 272:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -624,7 +544,6 @@ webpackJsonp([6,2,3,4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-<<<<<<< HEAD
 	var _APP = __webpack_require__(257);
 
 	var _APP2 = _interopRequireDefault(_APP);
@@ -674,57 +593,6 @@ webpackJsonp([6,2,3,4,5],{
 	var _MessageList2 = _interopRequireDefault(_MessageList);
 
 	var _NewRoomModal = __webpack_require__(275);
-=======
-	var _APP = __webpack_require__(261);
-
-	var _APP2 = _interopRequireDefault(_APP);
-
-	var _Home = __webpack_require__(262);
-
-	var _Home2 = _interopRequireDefault(_Home);
-
-	var _Chat = __webpack_require__(271);
-
-	var _Chat2 = _interopRequireDefault(_Chat);
-
-	var _Signup = __webpack_require__(270);
-
-	var _Signup2 = _interopRequireDefault(_Signup);
-
-	var _Login = __webpack_require__(265);
-
-	var _Login2 = _interopRequireDefault(_Login);
-
-	var _Loading = __webpack_require__(273);
-
-	var _Loading2 = _interopRequireDefault(_Loading);
-
-	var _ChatLeftSide = __webpack_require__(274);
-
-	var _ChatLeftSide2 = _interopRequireDefault(_ChatLeftSide);
-
-	var _ChatMiddleSide = __webpack_require__(275);
-
-	var _ChatMiddleSide2 = _interopRequireDefault(_ChatMiddleSide);
-
-	var _ChatRightSide = __webpack_require__(276);
-
-	var _ChatRightSide2 = _interopRequireDefault(_ChatRightSide);
-
-	var _RoomList = __webpack_require__(277);
-
-	var _RoomList2 = _interopRequireDefault(_RoomList);
-
-	var _Logout = __webpack_require__(269);
-
-	var _Logout2 = _interopRequireDefault(_Logout);
-
-	var _MessageList = __webpack_require__(278);
-
-	var _MessageList2 = _interopRequireDefault(_MessageList);
-
-	var _NewRoomModal = __webpack_require__(279);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _NewRoomModal2 = _interopRequireDefault(_NewRoomModal);
 
@@ -744,11 +612,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 269:
-=======
-/***/ 273:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -774,11 +638,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -813,11 +673,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 270:
-=======
-/***/ 274:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -843,21 +699,13 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(157);
+	var _reactRouter = __webpack_require__(158);
 
-<<<<<<< HEAD
 	var _constants = __webpack_require__(264);
-=======
-	var _constants = __webpack_require__(268);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var ChatLeftSide = (function (_React$Component) {
 	    _inherits(ChatLeftSide, _React$Component);
@@ -945,11 +793,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 271:
-=======
-/***/ 275:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -975,15 +819,11 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(157);
+	var _reactRouter = __webpack_require__(158);
 
 	var ChatMiddleSide = (function (_React$Component) {
 	    _inherits(ChatMiddleSide, _React$Component);
@@ -1014,11 +854,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 272:
-=======
-/***/ 276:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1045,15 +881,11 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(157);
+	var _reactRouter = __webpack_require__(158);
 
 	var ChatRightSide = (function (_React$Component) {
 	    _inherits(ChatRightSide, _React$Component);
@@ -1150,11 +982,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 273:
-=======
-/***/ 277:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1180,19 +1008,11 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
 	var _index = __webpack_require__(268);
-=======
-	var _reactDom = __webpack_require__(215);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _index = __webpack_require__(272);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var RoomList = (function (_React$Component) {
 	    _inherits(RoomList, _React$Component);
@@ -1296,11 +1116,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 274:
-=======
-/***/ 278:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1326,15 +1142,11 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRouter = __webpack_require__(157);
+	var _reactRouter = __webpack_require__(158);
 
 	var MessageList = (function (_React$Component) {
 	    _inherits(MessageList, _React$Component);
@@ -1568,11 +1380,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-<<<<<<< HEAD
 /***/ 275:
-=======
-/***/ 279:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1598,11 +1406,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
-=======
-	var _reactDom = __webpack_require__(215);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 

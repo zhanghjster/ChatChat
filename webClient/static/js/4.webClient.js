@@ -1,10 +1,6 @@
 webpackJsonp([4],{
 
-<<<<<<< HEAD
 /***/ 265:
-=======
-/***/ 269:
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -30,7 +26,6 @@ webpackJsonp([4],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-<<<<<<< HEAD
 	var _reactDom = __webpack_require__(219);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -38,15 +33,6 @@ webpackJsonp([4],{
 	var _reactRedux = __webpack_require__(220);
 
 	var _actions = __webpack_require__(262);
-=======
-	var _reactDom = __webpack_require__(215);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactRedux = __webpack_require__(216);
-
-	var _actions = __webpack_require__(266);
->>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Logout = (function (_React$Component) {
 	    _inherits(Logout, _React$Component);
