@@ -1,7 +1,3 @@
 .idea/*
-
 server/server
 conf/server.cfg
-webClient/static/js
-
-
