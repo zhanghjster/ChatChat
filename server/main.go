@@ -19,7 +19,7 @@ var (
 
 func init() {
 
-	configure = LoadConfigure("../conf/server_default.cfg")
+	configure = LoadConfigure()
 
 	rdbPool = NewRDBpool(configure.Redis.Host)
 	sessionManager, _ = NewSessionManager("chatchat", 100000)

@@ -1,6 +1,10 @@
 webpackJsonp([2],{
 
+<<<<<<< HEAD
 /***/ 258:
+=======
+/***/ 262:
+>>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26,9 +30,15 @@ webpackJsonp([2],{
 
 	var _react2 = _interopRequireDefault(_react);
 
+<<<<<<< HEAD
 	var _utils = __webpack_require__(259);
 
 	var _reactRedux = __webpack_require__(220);
+=======
+	var _utils = __webpack_require__(263);
+
+	var _reactRedux = __webpack_require__(216);
+>>>>>>> f293e4ad7326621b3d0b97265e09fef102a30945
 
 	var Home = (function (_React$Component) {
 	    _inherits(Home, _React$Component);

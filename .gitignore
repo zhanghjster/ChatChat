@@ -1,4 +1,7 @@
 .idea/*
-server/server/*
+
+server/server
 conf/server.cfg
-webClient/static/*
+webClient/static/js
+
+
