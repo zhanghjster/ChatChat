@@ -34,7 +34,9 @@ class Chat extends React.Component {
     }
 
     _tabInitialize() {
-        if (!this.props.chat.currentTab.initialized) {
+        if (!this.props.chat.currentTab.initialized
+            && !this.props.chat.currentTab.initializing) {
+            console.log("tab initialize");
             this.props.dispatch(tabInitialize());
         }
     }
