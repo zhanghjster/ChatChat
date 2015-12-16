@@ -1,6 +1,6 @@
 webpackJsonp([6,2,3,4,5],{
 
-/***/ 258:
+/***/ 260:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26,9 +26,9 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _utils = __webpack_require__(259);
+	var _utils = __webpack_require__(261);
 
-	var _reactRedux = __webpack_require__(220);
+	var _reactRedux = __webpack_require__(222);
 
 	var Home = (function (_React$Component) {
 	    _inherits(Home, _React$Component);
@@ -66,7 +66,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 261:
+/***/ 263:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -92,15 +92,15 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
 	var _reactRouter = __webpack_require__(158);
 
-	var _reactRedux = __webpack_require__(220);
+	var _reactRedux = __webpack_require__(222);
 
-	var _actions = __webpack_require__(262);
+	var _actions = __webpack_require__(264);
 
 	var Login = (function (_React$Component) {
 	    _inherits(Login, _React$Component);
@@ -216,7 +216,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 265:
+/***/ 267:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -242,13 +242,13 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRedux = __webpack_require__(220);
+	var _reactRedux = __webpack_require__(222);
 
-	var _actions = __webpack_require__(262);
+	var _actions = __webpack_require__(264);
 
 	var Logout = (function (_React$Component) {
 	    _inherits(Logout, _React$Component);
@@ -281,7 +281,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 266:
+/***/ 268:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -307,13 +307,13 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRedux = __webpack_require__(220);
+	var _reactRedux = __webpack_require__(222);
 
-	var _actions = __webpack_require__(262);
+	var _actions = __webpack_require__(264);
 
 	var Signup = (function (_React$Component) {
 	    _inherits(Signup, _React$Component);
@@ -401,7 +401,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 267:
+/***/ 269:
 /***/ function(module, exports, __webpack_require__) {
 
 	/** Created by ben on 15/11/18. **/
@@ -425,23 +425,23 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRedux = __webpack_require__(220);
+	var _reactRedux = __webpack_require__(222);
 
-	var _actions = __webpack_require__(262);
+	var _actions = __webpack_require__(264);
 
-	var _utilsHistoryJs = __webpack_require__(255);
+	var _utilsHistoryJs = __webpack_require__(257);
 
 	var _utilsHistoryJs2 = _interopRequireDefault(_utilsHistoryJs);
 
-	var _index = __webpack_require__(268);
+	var _index = __webpack_require__(270);
 
-	var _utils = __webpack_require__(259);
+	var _utils = __webpack_require__(261);
 
-	var _constants = __webpack_require__(264);
+	var _constants = __webpack_require__(266);
 
 	var Chat = (function (_React$Component) {
 	    _inherits(Chat, _React$Component);
@@ -477,7 +477,8 @@ webpackJsonp([6,2,3,4,5],{
 	    }, {
 	        key: '_tabInitialize',
 	        value: function _tabInitialize() {
-	            if (!this.props.chat.currentTab.initialized) {
+	            if (!this.props.chat.currentTab.initialized && !this.props.chat.currentTab.initializing) {
+	                console.log('tab initialize');
 	                this.props.dispatch((0, _actions.tabInitialize)());
 	            }
 	        }
@@ -530,7 +531,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 268:
+/***/ 270:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -544,55 +545,55 @@ webpackJsonp([6,2,3,4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _APP = __webpack_require__(257);
+	var _APP = __webpack_require__(259);
 
 	var _APP2 = _interopRequireDefault(_APP);
 
-	var _Home = __webpack_require__(258);
+	var _Home = __webpack_require__(260);
 
 	var _Home2 = _interopRequireDefault(_Home);
 
-	var _Chat = __webpack_require__(267);
+	var _Chat = __webpack_require__(269);
 
 	var _Chat2 = _interopRequireDefault(_Chat);
 
-	var _Signup = __webpack_require__(266);
+	var _Signup = __webpack_require__(268);
 
 	var _Signup2 = _interopRequireDefault(_Signup);
 
-	var _Login = __webpack_require__(261);
+	var _Login = __webpack_require__(263);
 
 	var _Login2 = _interopRequireDefault(_Login);
 
-	var _Loading = __webpack_require__(269);
+	var _Loading = __webpack_require__(271);
 
 	var _Loading2 = _interopRequireDefault(_Loading);
 
-	var _ChatLeftSide = __webpack_require__(270);
+	var _ChatLeftSide = __webpack_require__(272);
 
 	var _ChatLeftSide2 = _interopRequireDefault(_ChatLeftSide);
 
-	var _ChatMiddleSide = __webpack_require__(271);
+	var _ChatMiddleSide = __webpack_require__(273);
 
 	var _ChatMiddleSide2 = _interopRequireDefault(_ChatMiddleSide);
 
-	var _ChatRightSide = __webpack_require__(272);
+	var _ChatRightSide = __webpack_require__(274);
 
 	var _ChatRightSide2 = _interopRequireDefault(_ChatRightSide);
 
-	var _RoomList = __webpack_require__(273);
+	var _RoomList = __webpack_require__(275);
 
 	var _RoomList2 = _interopRequireDefault(_RoomList);
 
-	var _Logout = __webpack_require__(265);
+	var _Logout = __webpack_require__(267);
 
 	var _Logout2 = _interopRequireDefault(_Logout);
 
-	var _MessageList = __webpack_require__(274);
+	var _MessageList = __webpack_require__(276);
 
 	var _MessageList2 = _interopRequireDefault(_MessageList);
 
-	var _NewRoomModal = __webpack_require__(275);
+	var _NewRoomModal = __webpack_require__(277);
 
 	var _NewRoomModal2 = _interopRequireDefault(_NewRoomModal);
 
@@ -612,7 +613,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 269:
+/***/ 271:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -638,7 +639,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -673,7 +674,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 270:
+/***/ 272:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -699,13 +700,13 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
 	var _reactRouter = __webpack_require__(158);
 
-	var _constants = __webpack_require__(264);
+	var _constants = __webpack_require__(266);
 
 	var ChatLeftSide = (function (_React$Component) {
 	    _inherits(ChatLeftSide, _React$Component);
@@ -793,7 +794,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 271:
+/***/ 273:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -819,7 +820,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -854,7 +855,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 272:
+/***/ 274:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -881,7 +882,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -982,7 +983,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 273:
+/***/ 275:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1008,11 +1009,11 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _index = __webpack_require__(268);
+	var _index = __webpack_require__(270);
 
 	var RoomList = (function (_React$Component) {
 	    _inherits(RoomList, _React$Component);
@@ -1116,7 +1117,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 274:
+/***/ 276:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1142,7 +1143,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -1380,7 +1381,7 @@ webpackJsonp([6,2,3,4,5],{
 
 /***/ },
 
-/***/ 275:
+/***/ 277:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1406,7 +1407,7 @@ webpackJsonp([6,2,3,4,5],{
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(219);
+	var _reactDom = __webpack_require__(221);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 

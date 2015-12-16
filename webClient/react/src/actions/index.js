@@ -6,7 +6,7 @@ import { pushState } from 'redux-router';
 import {
     LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAIL, LOGOUT,
     SIGNUP_REQUEST, SIGNUP_FAIL,
-    CHAT_INITIALIZE_SUCCESS, CHANNEL_INITIALIZE_FAIL,
+    CHAT_INITIALIZE_SUCCESS, CHANNEL_INITIALIZE_FAIL, TAB_INITIALIZING,
     TAB_INITIALIZE_SUCCESS, TAB_INITIALIZE_FAIL,
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
@@ -239,6 +239,7 @@ export function lobbyInitialize(dispatch, state)  {
     let currentTab = state.chat.currentTab;
     let token      = state.auth.token;
 
+    dispatch(tabInitiallizing());
     //fetch the roomlist
     fetch(API_BASE + "/lobby_initialize", {
         method: 'get',
@@ -270,6 +271,8 @@ export function roomInitialize(dispatch, state) {
     let token = state.auth.token;
     let roomID = state.chat.currentTab.ID;
 
+    dispatch(tabInitiallizing());
+
     fetch(API_BASE + "/room_initialize?roomID="+roomID, {
         method: 'get',
         headers: {
@@ -286,8 +289,6 @@ export function roomInitialize(dispatch, state) {
             for (var i in response.messageList) {
                 roomData.addMessage(roomID, response.messageList[i]);
             }
-
-            // initialize success
             dispatch(tabInitiallizeSuccess(roomID));
             dispatch({
                 type: ROOM_INITIALIZE_SUCCESS,
@@ -297,6 +298,7 @@ export function roomInitialize(dispatch, state) {
                     ID: roomID
                 }
             })
+
     })
     .catch( (err) => {
         if (err.response != null) {
@@ -313,6 +315,17 @@ export function tabInitiallizeSuccess(tabID) {
     return {
         type: TAB_INITIALIZE_SUCCESS,
         payload: { ID: tabID}
+    }
+}
+
+export function tabInitiallizing() {
+    return {
+        type: TAB_INITIALIZING,
+    }
+}
+export function tabInitiallizeFail(tabID) {
+    return {
+        type: TAB_INITIALIZE_FAIL,
     }
 }
 
