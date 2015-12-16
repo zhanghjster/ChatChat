@@ -23,5 +23,5 @@ export default class ReduxDevTool extends React.Component {
                 </div>
             </div>
         )
-    }
+    } 
 }
