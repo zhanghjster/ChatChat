@@ -3,10 +3,7 @@ package main
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-
-	"fmt"
 	"github.com/garyburd/redigo/redis"
-	"strconv"
 )
 
 func TestRDBconnection(t *testing.T) {
@@ -57,7 +54,7 @@ func TestSETandGET(t *testing.T) {
 
 	db.EXPIRE("benben", 1000000)
 
-	//db.DEL("benben")
+	db.DEL("benben")
 
 }
 
@@ -65,10 +62,8 @@ func TestINCRYBY(t *testing.T) {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	next_id, err := db.INCRBY("test_next_id", 1)
+	_, err := db.INCRBY("test_next_id", 1)
 
 	assert.Nil(t, err)
 
-	fmt.Println(next_id)
-	fmt.Println(strconv.FormatInt(132333, 10))
 }

@@ -370,7 +370,7 @@ func peerLeaveRoom(userID, roomID int) (bool, error) {
 	}
 
 	// remove peer from room's peer list
-	if _, err := db.ZADD(genRedisKey(ROOM_PEER_PRE, roomIDstr), userID); err != nil {
+	if err := db.ZREM(genRedisKey(ROOM_PEER_PRE, roomIDstr), userID); err != nil {
 		return false, err
 	}
 
