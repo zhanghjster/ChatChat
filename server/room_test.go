@@ -28,7 +28,7 @@ func TestCurrentTab(t *testing.T) {
 func TestRoomRaw(t *testing.T) {
 	userID := 1
 
-	roomRaw := &RoomRaw{
+	roomRaw := &RoomData{
 		Name:        "Benx's second room",
 		OwnerID:     userID,
 		IsPrivate:   true,
@@ -54,7 +54,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	userID := 1
 	roomID := 1
 
-	suc, err := peerJoinRoom(userID, roomID)
+	suc, err := userJoinRoom(userID, roomID)
 
 	assert.Nil(t, err, "peer join room err check")
 	assert.True(t, suc, "peer join room suc check")
@@ -64,7 +64,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.True(t, exists, "peer in room")
 
 
-	suc1, err1 := peerLeaveRoom(userID, roomID)
+	suc1, err1 := userLeaveRoom(userID, roomID)
 	assert.Nil(t, err1, "peer leave room err check")
 	assert.True(t, suc1, "peer leave room suc check")
 
