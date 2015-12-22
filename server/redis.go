@@ -38,9 +38,9 @@ func NewRDBpool(address string) *RDBpool {
 			c, err := redis.DialTimeout(
 				"tcp",
 				address,
-				time.Duration(5)*time.Second,
-				time.Duration(5)*time.Second,
-				time.Duration(5)*time.Second,
+				time.Duration(1)*time.Second,
+				time.Duration(1)*time.Second,
+				time.Duration(1)*time.Second,
 			)
 			if err != nil {
 				return nil, err
@@ -49,6 +49,13 @@ func NewRDBpool(address string) *RDBpool {
 			return c, err
 		},
 	}
+
+	conn := pool.Get()
+	defer conn.Close()
+	if conn.Err() != nil {
+		panic("Can not connect to redis")
+	}
+
 	return &RDBpool{pool: pool}
 }
 
