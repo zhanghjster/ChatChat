@@ -3,8 +3,8 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
-"encoding/json"
-	"github.com/go/src/fmt"
+	"encoding/json"
+	"fmt"
 )
 
 type Peer struct {
