@@ -10,7 +10,7 @@ use Getopt::Long;
 use vars qw/$token/;
 GetOptions(
     'token=s' => \$token
-)
+);
 
 $token ||= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVfYXQiOjE0NTMzODIwNDIsInVzZXJJRCI6MX0.WgpkhdPdSbMqgCjLYeIx-KhauGfAkeswcscI-lKbPOU";
 

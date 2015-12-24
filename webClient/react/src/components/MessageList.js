@@ -5,14 +5,48 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
 
+var ENTER_KEY_CODE = 13;
+
 export default class MessageList extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {text: ""};
+    }
+    _onChange (event, value) {
+        this.setState({text: event.target.value});
+    }
+
+    _onKeyDown(event, value) {
+        if (event.keyCode === ENTER_KEY_CODE) {
+            event.preventDefault();
+            var text = this.state.text.trim();
+            if (text) {
+                this.props.messageSendHandler(text);
+            }
+            this.setState({text: ''});
+        }
+    }
 
     render() {
+        let messageList = this.props.messageList;
+        let messageItems = messageList.map( (message) => {
+            return (
+                <div className="activity terques">
+                    <span> </span>
+                    <div className="activity-desk">
+                        <div className="panel">
+                            <div className="panel-body">
+                                <div className="arrow"></div>
+                                <h5><a href="#">{message.u}</a><div className="message_time">{message.t}</div></h5>
+                                <p>{message.m}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        });
 
-
-
-        let time = " at 1:55pm, 13th April 2013";
         return (
             <div>
                 <div className="chat-room-head">
@@ -21,75 +55,26 @@ export default class MessageList extends React.Component {
                         <input type="text" placeholder="Search" className="form-control search-btn "/>
                     </form>
                 </div>
-                <div className="message-list" >
-                    <section className="panel ">
-                        <div className="panel-body " >
-                            <div className="activity terques">
-
-                                     <span>
-                                          ZHJ
-                                      </span>
-
-                                <div className="activity-desk">
-                                    <div className="panel">
-                                        <div className="panel-body">
-                                            <div className="arrow"></div>
-                                            <h5><a href="#">Jhon Doe</a><div className="message_time">{time}</div></h5>
-                                            <p> Purchased new equipments for zonal office setup and stationaries.</p>
-                                        </div>
-                                    </div>
-                                </div>
+                <div className="messages">
+                    <div className="message-list" >
+                        <section className="panel ">
+                            <div className="panel-body " >
+                                {messageItems}
                             </div>
-                            <div className="activity alt purple">
-                                      <span>
-                                          ZHJ
-                                      </span>
-                                <div className="activity-desk">
-                                    <div className="panel">
-                                        <div className="panel-body">
-                                            <div className="arrow-alt"></div>
-                                            <h5><a href="#">Jhon Doe</a><div className="message_time">{time}</div></h5>
-                                            <p>Lorem ipsum dolor sit amet consiquest dio</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="activity blue">
-                                      <span>
-                                          JAU
-                                      </span>
-                                <div className="activity-desk">
-                                    <div className="panel">
-                                        <div className="panel-body">
-                                            <div className="arrow"></div>
-
-                                            <h5><a href="#">Jhon Doe</a><div className="message_time">{time}</div></h5>
-                                            <p>Please note which location you will consider, or both. Reporting to the VP  you will be responsible for managing.. </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="activity alt green">
-                                      <span>
-                                          Lee
-                                      </span>
-                                <div className="activity-desk">
-                                    <div className="panel">
-                                        <div className="panel-body">
-                                            <div className="arrow-alt"></div>
-                                            <h5><a href="#">Jhon Doe</a><div className="message_time">{time}</div></h5>
-                                            <p>Please note which location you will consider, or both.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                        </section>
+                    </div>
                 </div>
                 <div className="footer">
                     <div className="chat-form">
                         <div className="input-cont ">
-                            <textarea className="form-control" id="message" rows="5" placeholder="Enter a message ..." ></textarea>
+                            <textarea
+                                className="form-control"
+                                id="message" rows="5"
+                                placeholder="Enter a message ..."
+                                value={this.state.text}
+                                onChange={this._onChange.bind(this)}
+                                onKeyDown={this._onKeyDown.bind(this)}>
+                            </textarea>
                         </div>
                     </div>
                 </div>

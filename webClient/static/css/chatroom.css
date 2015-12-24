@@ -53,6 +53,11 @@
     overflow-y:auto;
 }
 
+.chat-room .mid-side .messages {
+    height: 650px;
+    overflow: hidden;
+}
+
 .chat-room .mid-side .message-list {
      height: 650px;
      overflow-y:auto;

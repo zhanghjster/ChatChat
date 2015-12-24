@@ -10,12 +10,20 @@ import {
     TAB_INITIALIZE_SUCCESS, TAB_INITIALIZE_FAIL,
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
-    ROOM_INITIALIZE_SUCCESS,
+    ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE,
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
 
 var API_BASE = "http://localhost:3001/api/v1";
+var WS_BASE  = "ws://localhost:3001/api/v1/start_chat";
+
+let WS = null;
+
+let PACKET_MESSAGE      = 1;
+let PACKET_PEER_JOIN    = 2;
+let PACKET_PEER_LEFT    = 3;
+let PACKET_PEER_STATUS  = 4;
 
 // login
 export function login(username, password) {
@@ -155,7 +163,7 @@ export function signupFail(error) {
 // chat page initialization functions
 export function chatInitialize() {
     return (dispatch, getState) => {
-        let state = getState()
+        let state = getState();
         let token = state.auth.token;
 
         fetch(API_BASE + "/chat_initialize", {
@@ -180,6 +188,17 @@ export function chatInitialize() {
                     currentTab:  currentTab,
                     roomList: response.roomList
                 }));
+
+                WS = new WebSocket(WS_BASE + "?access_token=" + token);
+                WS.onmessage = (message) => {
+                    processMessage(dispatch, getState, JSON.parse(message.data));
+                };
+                WS.onclose = (event) => {
+                    //processClose(dispatch, event);
+                };
+                WS.onerror = (event) => {
+                    //processError(dispatch, event);
+                };
         })
         .catch( (err) => {
             if (err.response != null) {
@@ -191,6 +210,46 @@ export function chatInitialize() {
             }
         });
     }
+}
+
+function processMessage(dispatch, getState, message) {
+    let state = getState();
+    let tabID = state.chat.currentTab.ID;
+    let tabType = state.chat.currentTab.Type;
+    console.log(message);
+    switch (message.a) {
+        case PACKET_MESSAGE:
+            if (tabType == TAB_ROOM) {
+                if ( tabID == message.r ) {
+                    roomData.addMessage(message.r, message);
+                }
+                dispatch({
+                    type: NEW_MESSAGE,
+                    payload: {
+                        message: message
+                    },
+                })
+            }
+            break;
+        case PACKET_PEER_JOIN:
+            break;
+        case PACKET_PEER_LEFT:
+            break;
+    }
+}
+
+export function sendMessage(message) {
+    return (dispatch,getState) => {
+        let state = getState();
+        let roomID = state.chat.currentTab.ID;
+        if (WS != null) {
+            WS.send(JSON.stringify({
+                a: PACKET_MESSAGE,
+                r: roomID,
+                m: message,
+            }));
+        }
+    };
 }
 
 export function chatInitializeFail(error) {

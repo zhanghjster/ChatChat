@@ -41,7 +41,7 @@ type Room struct {
 	broadcastChan chan []byte
 	registerChan  chan *Peer
 	unregisterChan chan *Peer
-
+	exitChan		chan int
 	time int
 }
 
@@ -67,6 +67,12 @@ func (rm *Rooms) set(id int, room *Room) {
 	rm.rooms[id] = room
 }
 
+func (rm *Rooms) del(id int) {
+	rm.Lock()
+	defer rm.Unlock()
+	delete(rm.rooms, id)
+}
+
 var rooms = &Rooms{
 	rooms: make(map[int]*Room),
 }
@@ -79,6 +85,8 @@ func NewRoom(roomID int) *Room {
 		broadcastChan:  make(chan []byte),
 		registerChan: make(chan *Peer),
 		peers: make(map[*Peer]bool),
+
+		exitChan: make(chan int),
 
 		time: int(time.Now().Unix()),
 	}
@@ -110,12 +118,24 @@ func (r *Room) run() {
 		case message := <-r.broadcastChan:
 			for peer := range r.peers {
 				select{
-					case peer.sendChan <- message:
-					default:
+				case peer.sendChan <- message:
+				case <- peer.exitChan:
 				}
 			}
+			continue
+		case <- r.exitChan:
+			rooms.del(r.ID)
+			for peer := range r.peers {
+				select {
+				case peer.roomExitChan <- r:
+				case <- peer.exitChan:
+				}
+			}
+			goto exit
 		}
 	}
+
+	exit:
 }
 
 func (r *Room) broadcastPacket(message []byte) {

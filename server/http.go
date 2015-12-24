@@ -183,8 +183,6 @@ func chatEndPoint(c *gin.Context) {
 	userID64, _ := c.Get("userID")
 	userID := userID64.(int)
 
-	fmt.Println("start chat")
-
 	// get room list user in
 	roomIDs, err := getUserRoomIDs(userID)
 	if err != nil {
@@ -202,9 +200,9 @@ func chatEndPoint(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("ws connected")
+	username, _ := getUsername(userID)
 
-	peer := NewPeer(ws, userID)
+	peer := NewPeer(ws, userID, username)
 
 	for _, id := range roomIDs {
 		if suc := peer.joinRoom(id); !suc {
@@ -217,10 +215,6 @@ func chatEndPoint(c *gin.Context) {
 
 	go peer.read()
 	peer.talk()
-
-	for id := range roomIDs {
-		peer.leaveRoom(id)
-	}
 }
 
 func chatInitializeEndPoint(c *gin.Context) {
