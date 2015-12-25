@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 	"encoding/json"
+"strconv"
+"errors"
 )
 
 type Peer struct {
@@ -96,48 +98,46 @@ func (p *Peer) talk() {
 
 func (p *Peer) processMessage(message []byte) {
 
-	data := struct {
-		Action  int    `json:"a"`
-		Message string `json:"m"`
-		RoomID  int	   `json:"r"`
-	}{}
+
+	data := &Message{}
 	s := string(message[:])
 	log.Println("string is " + s)
+
 	// parse the message
-	err := json.Unmarshal(message, &data)
+	err := json.Unmarshal(message, data)
 	if err != nil {
 		return
 	}
 
 	switch int(data.Action) {
-	case TypeMessage:
+	case TypePacket:
 		if len(data.Message) == 0 {
 			return
 		}
 
 		if room, exists := p.rooms[data.RoomID]; exists {
-			content := struct {
-				Action  int    `json:"a"`
-				PeerID  int    `json:"p"`
-				Message string `json:"m"`
-				RoomID  int		`json:"r"`
-				Time    string  `json:"t"`
-				Username string `json:"u"`
-			}{
-				TypeMessage,
-				p.ID,
-				data.Message,
-				room.ID,
-				time.Now().Format(TIME_LAYOUT),
-				p.username,
+
+			nextMsgID, err := nextMsgID(data.RoomID)
+			if err != nil {
+				return
 			}
 
-			message, err := json.Marshal(content)
+			data.ID = nextMsgID
+			data.Action = TypePacket
+			data.RoomID = data.RoomID
+			data.PeerID = p.ID
+			data.Username = p.username
+			data.Time = time.Now().Format(TIME_LAYOUT)
+			if  err := saveMessage(data); err != nil {
+				return
+			}
+
+			msg, err := json.Marshal(data)
 			if err != nil {
 				return
 			}
 			select {
-			case room.broadcastChan <- message:
+			case room.broadcastChan <- msg:
 			case <- room.exitChan:
 			}
 		}
@@ -177,4 +177,35 @@ func (p *Peer) leaveRoom(roomID int) {
 	case room.unregisterChan <- p:
 	case <- room.exitChan:
 	}
+}
+
+func peerInRoom(userID, roomID int) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	if exists, _ := roomExist(roomID); !exists {
+		return false, errors.New("room not exists")
+	}
+
+	if _, err := db.ZRANK(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
+		return false, err
+	}
+
+	if _, err := db.ZRANK(genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), userID); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func getPeerIDofRoom(roomID int) (*[]int, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	var peerID []int
+	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
+		return nil, err
+	}
+
+	return &peerID, nil
 }

@@ -55,7 +55,7 @@
 
 .chat-room .mid-side .messages {
     height: 650px;
-    overflow: hidden;
+    overflow-y:auto;
 }
 
 .chat-room .mid-side .message-list {
@@ -138,5 +138,9 @@
 }
 
 ul.chat-available-user li i {
+    text-transform: uppercase
+}
+
+.group-rom .first-part:first-letter {
     text-transform: uppercase
 }

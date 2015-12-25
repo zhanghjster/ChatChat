@@ -28,21 +28,24 @@ export default class MessageList extends React.Component {
         }
     }
 
+    componentDidUpdate() {
+        this._scrollToBottom();
+    }
+
+    _scrollToBottom() {
+        var ul = this.refs.messageList;
+        ul.scrollTop = ul.scrollHeight;
+    }
+
     render() {
         let messageList = this.props.messageList;
-        let messageItems = messageList.map( (message) => {
+        let messageItems = messageList.map( (message, index) => {
+            let firstPartClass = (index%2 == 0) ? "first-part" : "first-part odd";
             return (
-                <div className="activity terques">
-                    <span> </span>
-                    <div className="activity-desk">
-                        <div className="panel">
-                            <div className="panel-body">
-                                <div className="arrow"></div>
-                                <h5><a href="#">{message.u}</a><div className="message_time">{message.t}</div></h5>
-                                <p>{message.m}</p>
-                            </div>
-                        </div>
-                    </div>
+                <div className="group-rom">
+                    <div className={firstPartClass}>{message.u}</div>
+                    <div className="second-part">{message.m}</div>
+                    <div className="third-part">{message.t}</div>
                 </div>
             )
         });
@@ -55,14 +58,8 @@ export default class MessageList extends React.Component {
                         <input type="text" placeholder="Search" className="form-control search-btn "/>
                     </form>
                 </div>
-                <div className="messages">
-                    <div className="message-list" >
-                        <section className="panel ">
-                            <div className="panel-body " >
-                                {messageItems}
-                            </div>
-                        </section>
-                    </div>
+                <div className="messages" ref="messageList">
+                    {messageItems}
                 </div>
                 <div className="footer">
                     <div className="chat-form">

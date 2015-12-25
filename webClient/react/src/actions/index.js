@@ -10,7 +10,7 @@ import {
     TAB_INITIALIZE_SUCCESS, TAB_INITIALIZE_FAIL,
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
-    ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE,
+    ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -83,8 +83,6 @@ export function loginRequest() {
 export function changeTab(newType, newID, name) {
     return (dispatch, getState) => {
         let state = getState();
-        console.log(state.chat.initializedTab);
-
         dispatch({
             type: TAB_CHANGED,
             payload: {
@@ -228,7 +226,7 @@ function processMessage(dispatch, getState, message) {
                     payload: {
                         message: message
                     },
-                })
+                });
             }
             break;
         case PACKET_PEER_JOIN:

@@ -5,6 +5,9 @@ import (
 "github.com/garyburd/redigo/redis"
 )
 
+const (
+	TypePacket = 1
+)
 type Message struct {
 	ID		int64  `json:"i"`
 	Action  int    `json:"a"`
@@ -21,30 +24,25 @@ func nextMsgID(roomID int) (int64, error) {
 	return db.INCRBY(genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID)), 1)
 }
 
-func saveMessage(packet *Message) error {
+func saveMessage(msg *Message) error {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	roomIDStr := strconv.Itoa(packet.RoomID)
+	roomIDStr := strconv.Itoa(msg.RoomID)
 
-	nextMsgID, err := db.INCRBY(genRedisKey(ROOM_NEXT_MSG_ID_PRE, roomIDStr), 1)
+	packetB, err := json.Marshal(msg)
 	if err != nil {
-		return false, err
+		return  err
 	}
 
-	packetB, err := json.Marshal(packet)
-	if err != nil {
-		return false, err
+	if _, err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), msg.ID, string(packetB)); err != nil {
+		return err
 	}
 
-	if _, err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), nextMsgID, string(packetB)); err != nil {
-		return false, err
-	}
-
-	return true, nil
+	return  nil
 }
 
-func getMessages(roomID int, lastID int64, limit int64) (*[]Message, error) {
+func getMessages(roomID int, lastID int64, limit int64) ([]Message, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 
@@ -62,12 +60,12 @@ func getMessages(roomID int, lastID int64, limit int64) (*[]Message, error) {
 		return nil, err
 	}
 
-	packets := make([]Message, len(rawPacket))
+	messages := make([]Message, len(rawPacket))
 	for i, Msg := range rawPacket {
-		json.Unmarshal([]byte(Msg), &(packets[i]))
+		json.Unmarshal([]byte(Msg), &(messages[i]))
 	}
 
-	return &packets, nil
+	return messages, nil
 }
 
 func getMaxMessageID(roomID int) (int64, error) {

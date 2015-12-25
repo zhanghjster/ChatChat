@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+"time"
+	"github.com/go/src/fmt"
 )
 
 func TestCurrentTab(t *testing.T) {
@@ -83,12 +85,28 @@ func TestMsg(t *testing.T) {
 
 	roomID := 1
 	username := "benx"
+	peerID := 1
 
-	_, err := saveMessage(username, roomID, "how are you????")
-	assert.Nil(t, err, "save messsage err")
+	id, err := nextMsgID(roomID)
+	assert.Nil(t, err, "next message id")
+	msg := Message{
+		ID: id,
+		RoomID: roomID,
+		Action: TypePacket,
+		Username: username,
+		Time: time.Now().Format(TIME_LAYOUT),
+		PeerID: peerID,
+	}
 
-	_, err1 := getMessages(roomID, 10, 10)
-	assert.Nil(t, err1, "get message error")
+	err1 := saveMessage(&msg)
+	assert.Nil(t, err1, "save messsage err")
+
+	maxMsgID, err := getMaxMessageID(roomID)
+
+	msgs, err2 := getMessages(roomID, maxMsgID, 1)
+	fmt.Print(msgs)
+	assert.EqualValues(t, msg, msgs[0])
+	assert.Nil(t, err2, "get message error")
 }
 
 func TestUserStatus(t *testing.T) {

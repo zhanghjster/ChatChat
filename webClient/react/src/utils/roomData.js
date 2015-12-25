@@ -29,6 +29,7 @@ class RoomData  {
         if (arrayContains(this._messages[roomID], message)) {
             return;
         }
+
         this._messages[roomID].push(message);
     }
 

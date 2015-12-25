@@ -4,6 +4,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"strconv"
 	"time"
+"errors"
 )
 
 type User struct {
@@ -117,4 +118,68 @@ func getUserPassword(username string) string {
 
 	password, _ := redis.String(db.HGET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "password"))
 	return password
+}
+
+func userJoinRoom(userID, roomID int) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	roomIDStr := strconv.Itoa(roomID)
+
+	if exists, _ := roomExist(roomID); !exists {
+		return false, nil
+	}
+
+	// add room to peer's room list
+	_, err := db.ZADD(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)),
+		time.Now().Unix(), roomID,
+	)
+
+	if err != nil {
+		return false, err
+	}
+
+	// add peer to room's peer list
+	_, err1 := db.ZADD(genRedisKey(ROOM_PEER_PRE, roomIDStr),
+		time.Now().Unix(), userID,
+	)
+	if err1 != nil {
+		return false, err1
+	}
+
+	// increase room member count
+	_, err2 := db.HINCRBY(genRedisKey(ROOM_CACHE_PRE, roomIDStr), "members", 1)
+	if err2 != nil {
+		return false, err2
+	}
+
+	return true, nil
+}
+
+func userLeaveRoom(userID, roomID int) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	roomIDstr := strconv.Itoa(roomID)
+
+	if exists, _ := roomExist(roomID); !exists {
+		return false, errors.New("room not exists")
+	}
+
+	// remove room from peer's room list
+	if err := db.ZREM(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
+		return false, err
+	}
+
+	// remove peer from room's peer list
+	if err := db.ZREM(genRedisKey(ROOM_PEER_PRE, roomIDstr), userID); err != nil {
+		return false, err
+	}
+
+	// decrease the room member
+	if _, err := db.HINCRBY(genRedisKey(ROOM_CACHE_PRE, roomIDstr), "members", -1); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

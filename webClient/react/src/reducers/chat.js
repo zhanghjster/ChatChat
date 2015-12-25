@@ -114,6 +114,9 @@ var messageList = createReducer([], {
     },
     [TAB_CHANGING]: (state, payload) => {
         return [];
+    },
+    [TAB_CHANGED]: (state, payload) => {
+        return [...payload.messageList];
     }
 });
 
