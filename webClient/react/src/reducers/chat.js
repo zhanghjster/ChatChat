@@ -5,7 +5,7 @@ import {createReducer} from '../utils';
 import {combineReducers} from 'redux';
 import {
     CHAT_INITIALIZE_SUCCESS,
-    TAB_INITIALIZE_SUCCESS, TAB_CHANGING, TAB_CHANGED,
+    TAB_INITIALIZE_SUCCESS, TAB_INITIALIZING, TAB_INITIALIZE_FAIL, TAB_CHANGING, TAB_CHANGED,
     ROOMLIST_INITIALIZED, LEAVE_ROOM, JOIN_ROOM, CREATE_ROOM,
     NEW_MESSAGE,
     MEMBER_ACTIVE, MEMBER_UNACTIVE, MEMBER_JOIN, MEMBER_LEAVE,
@@ -16,6 +16,7 @@ import {
 
 var tabInitialState = {
     initialized: false,
+    initializing: false,
     Type: null,
     ID : null,
     Name: ""
@@ -39,10 +40,22 @@ var currentTab = createReducer(tabInitialState, {
             Name: payload.currentTab.Name,
         };
     },
+    [TAB_INITIALIZING]: (state, payload) => {
+        return Object.assign({}, state, {
+            initializing: true,
+        });
+    },
 
     [TAB_INITIALIZE_SUCCESS]: (state, payload) => {
         return Object.assign({}, state, {
             initialized: true,
+            initializing: false,
+        });
+    },
+    [TAB_INITIALIZE_FAIL] :  (state, payload) => {
+        return Object.assign({}, state, {
+            initialized: false,
+            initializing: false,
         });
     },
 
