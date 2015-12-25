@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -29,7 +28,7 @@ func TestCurrentTab(t *testing.T) {
 func TestRoomRaw(t *testing.T) {
 	userID := 1
 
-	roomRaw := &RoomRaw{
+	roomRaw := &RoomData{
 		Name:        "Benx's second room",
 		OwnerID:     userID,
 		IsPrivate:   true,
@@ -48,10 +47,6 @@ func TestRoomRaw(t *testing.T) {
 
 	assert.Equal(t, room.Name, roomRaw.Name)
 	assert.True(t, room.IsPrivate)
-
-	roomIDs, _ := getNewRoomIDs(0, 10)
-
-	fmt.Print(roomIDs)
 }
 
 func TestPeerJoinLeaveRoom(t *testing.T) {
@@ -59,7 +54,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	userID := 1
 	roomID := 1
 
-	suc, err := peerJoinRoom(userID, roomID)
+	suc, err := userJoinRoom(userID, roomID)
 
 	assert.Nil(t, err, "peer join room err check")
 	assert.True(t, suc, "peer join room suc check")
@@ -68,22 +63,20 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.Nil(t, err1, "peer in room error check")
 	assert.True(t, exists, "peer in room")
 
-	/*
-		suc1, err1 := PeerLeaveRoom(userID, roomID)
-		assert.Nil(t, err1, "peer leave room err check")
-		assert.True(t, suc1, "peer leave room suc check")
 
-		_, err3 := PeerInRoom(userID, roomID)
-		assert.NotNil(t, err3, "peer in room error check")
-	*/
+	suc1, err1 := userLeaveRoom(userID, roomID)
+	assert.Nil(t, err1, "peer leave room err check")
+	assert.True(t, suc1, "peer leave room suc check")
+
+	_, err3 := peerInRoom(userID, roomID)
+	assert.NotNil(t, err3, "peer in room error check")
 }
 
 func TestGetRoomID2NameMap(t *testing.T) {
 	userID := 1
 
-	mp, err := getRoomID2NameMap(userID)
+	_, err := getRoomID2NameMap(userID)
 	assert.Nil(t, err, "err?")
-	fmt.Println(mp)
 }
 
 func TestMsg(t *testing.T) {
@@ -94,9 +87,8 @@ func TestMsg(t *testing.T) {
 	_, err := saveMessage(username, roomID, "how are you????")
 	assert.Nil(t, err, "save messsage err")
 
-	messages, err := getMessages(roomID, 10, 10)
-	assert.Nil(t, err, "get message error")
-	fmt.Print(messages)
+	_, err1 := getMessages(roomID, 10, 10)
+	assert.Nil(t, err1, "get message error")
 }
 
 func TestUserStatus(t *testing.T) {

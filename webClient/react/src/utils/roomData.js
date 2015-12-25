@@ -26,7 +26,7 @@ class RoomData  {
             this._messages[roomID] = [];
         }
 
-        if (arrayContains(this._members[roomID], message)) {
+        if (arrayContains(this._messages[roomID], message)) {
             return;
         }
         this._messages[roomID].push(message);
