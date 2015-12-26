@@ -2,7 +2,7 @@
  * Created by Ben on 15/11/20.
  */
 import React, { PropTypes } from 'react';
-import {authCheck} from "../utils";
+import {authCheck} from "../utils/auth.js";
 import {connect} from "react-redux";
 
 class Home extends React.Component {
