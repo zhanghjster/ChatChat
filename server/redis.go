@@ -138,9 +138,16 @@ func (db *RDB) ZREVRANGE(out interface{}, args ...interface{}) error {
 	return err
 }
 
-// ZREVRANGEBYSCORE k offset limit
+// ZREVRANGEBYSCORE k start end
 func (db *RDB) ZREVRANGEBYSCORE(out interface{}, args ...interface{}) error {
 	values, err := redis.Values(db.conn.Do("ZREVRANGEBYSCORE", args...))
+	redis.ScanSlice(values, out)
+	return err
+}
+
+// ZREVRANGEBYSCORE k start end
+func (db *RDB) ZRANGEBYSCORE(out interface{}, args ...interface{}) error {
+	values, err := redis.Values(db.conn.Do("ZRANGEBYSCORE", args...))
 	redis.ScanSlice(values, out)
 	return err
 }

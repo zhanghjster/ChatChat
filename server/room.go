@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"github.com/garyburd/redigo/redis"
 	"strconv"
 	"time"
@@ -10,10 +8,6 @@ import (
 )
 
 const (
-	TypeMessage      = 1
-	PEER_AVAILABLE   = "available"
-	PEER_UNAVAILABLE = "unavailable"
-	PEER_BUSY        = "busy"
 	TAB_LOBBY = "TAB_LOBBY"
 	TAB_ROOM  = "TAB_ROOM"
 	TAB_PEER  = "TAB_PEER"
@@ -41,15 +35,8 @@ type Room struct {
 	broadcastChan chan []byte
 	registerChan  chan *Peer
 	unregisterChan chan *Peer
-
+	exitChan		chan int
 	time int
-}
-
-type Message struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	Time     string `json:"time"`
-	Content  string `json:"content"`
 }
 
 type Rooms struct {
@@ -67,6 +54,12 @@ func (rm *Rooms) set(id int, room *Room) {
 	rm.rooms[id] = room
 }
 
+func (rm *Rooms) del(id int) {
+	rm.Lock()
+	defer rm.Unlock()
+	delete(rm.rooms, id)
+}
+
 var rooms = &Rooms{
 	rooms: make(map[int]*Room),
 }
@@ -79,6 +72,8 @@ func NewRoom(roomID int) *Room {
 		broadcastChan:  make(chan []byte),
 		registerChan: make(chan *Peer),
 		peers: make(map[*Peer]bool),
+
+		exitChan: make(chan int),
 
 		time: int(time.Now().Unix()),
 	}
@@ -110,12 +105,24 @@ func (r *Room) run() {
 		case message := <-r.broadcastChan:
 			for peer := range r.peers {
 				select{
-					case peer.sendChan <- message:
-					default:
+				case peer.sendChan <- message:
+				case <- peer.exitChan:
 				}
 			}
+			continue
+		case <- r.exitChan:
+			rooms.del(r.ID)
+			for peer := range r.peers {
+				select {
+				case peer.roomExitChan <- r:
+				case <- peer.exitChan:
+				}
+			}
+			goto exit
 		}
 	}
+
+	exit:
 }
 
 func (r *Room) broadcastPacket(message []byte) {
@@ -216,100 +223,7 @@ func getRoomRaw(roomID int) (*RoomData, error) {
 	return roomRaw, nil
 }
 
-func userJoinRoom(userID, roomID int) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
 
-	roomIDStr := strconv.Itoa(roomID)
-
-	if exists, _ := roomExist(roomID); !exists {
-		return false, nil
-	}
-
-	// add room to peer's room list
-	_, err := db.ZADD(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)),
-		time.Now().Unix(), roomID,
-	)
-
-	if err != nil {
-		return false, err
-	}
-
-	// add peer to room's peer list
-	_, err1 := db.ZADD(genRedisKey(ROOM_PEER_PRE, roomIDStr),
-		time.Now().Unix(), userID,
-	)
-	if err1 != nil {
-		return false, err1
-	}
-
-	// increase room member count
-	_, err2 := db.HINCRBY(genRedisKey(ROOM_CACHE_PRE, roomIDStr), "members", 1)
-	if err2 != nil {
-		return false, err2
-	}
-
-	return true, nil
-}
-
-func userLeaveRoom(userID, roomID int) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	roomIDstr := strconv.Itoa(roomID)
-
-	if exists, _ := roomExist(roomID); !exists {
-		return false, errors.New("room not exists")
-	}
-
-	// remove room from peer's room list
-	if err := db.ZREM(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
-		return false, err
-	}
-
-	// remove peer from room's peer list
-	if err := db.ZREM(genRedisKey(ROOM_PEER_PRE, roomIDstr), userID); err != nil {
-		return false, err
-	}
-
-	// decrease the room member
-	if _, err := db.HINCRBY(genRedisKey(ROOM_CACHE_PRE, roomIDstr), "members", -1); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func peerInRoom(userID, roomID int) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	if exists, _ := roomExist(roomID); !exists {
-		return false, errors.New("room not exists")
-	}
-
-	if _, err := db.ZRANK(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
-		return false, err
-	}
-
-	if _, err := db.ZRANK(genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), userID); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func getPeerIDofRoom(roomID int) (*[]int, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	var peerID []int
-	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
-		return nil, err
-	}
-
-	return &peerID, nil
-}
 
 func roomExist(roomID int) (bool, error) {
 	db := rdbPool.Get()
@@ -317,69 +231,4 @@ func roomExist(roomID int) (bool, error) {
 	return db.EXISTS(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(roomID)))
 }
 
-func saveMessage(username string, roomID int, content string) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
 
-	roomIDStr := strconv.Itoa(roomID)
-
-	nextMsgID, err := db.INCRBY(genRedisKey(ROOM_NEXT_MSG_ID_PRE, roomIDStr), 1)
-	if err != nil {
-		return false, err
-	}
-
-	message := &Message{
-		ID:       nextMsgID,
-		Username: username,
-		Content:  content,
-		Time:     time.Now().Format(TIME_LAYOUT),
-	}
-
-	messageB, err := json.Marshal(message)
-	if err != nil {
-		return false, err
-	}
-
-	if _, err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), nextMsgID, string(messageB)); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func getMessages(roomID int, lastID int64, limit int64) (*[]Message, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	// get id
-	startID := lastID - limit
-	if startID <= 0 {
-		startID = 0
-	}
-
-	var rawMsg []string
-	err := db.ZREVRANGEBYSCORE(&rawMsg, genRedisKey(ROOM_MSG_CACHE_PRE, strconv.Itoa(roomID)),
-		lastID, startID,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	messages := make([]Message, len(rawMsg))
-	for i, Msg := range rawMsg {
-		json.Unmarshal([]byte(Msg), &(messages[i]))
-	}
-
-	return &messages, nil
-}
-
-func getMaxMessageID(roomID int) (int64, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	key := genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID))
-	if exist, _ := db.EXISTS(key); exist {
-		return redis.Int64(db.GET(key))
-	}
-	return 0, nil
-}

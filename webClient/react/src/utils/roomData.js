@@ -26,14 +26,30 @@ class RoomData  {
             this._messages[roomID] = [];
         }
 
-        if (arrayContains(this._members[roomID], message)) {
+        if (arrayContains(this._messages[roomID], message)) {
             return;
         }
+
         this._messages[roomID].push(message);
     }
 
     getMember(roomID, userID) {
+        if (this._members[roomID] == null) {
+            return null;
+        }
         return this._members[roomID][userID];
+    }
+
+    updateMemberStatus(roomID, userID, status) {
+        if (this._members[roomID] == null) {
+            return;
+        }
+
+        let member = this._members[roomID][userID];
+        if (member == null) {
+            return;
+        }
+        member["Status"] = status;
     }
 
     getMembers(roomID) {
