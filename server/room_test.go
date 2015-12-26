@@ -105,7 +105,7 @@ func TestMsg(t *testing.T) {
 
 	msgs, err2 := getMessages(roomID, maxMsgID, 1)
 	fmt.Print(msgs)
-	assert.EqualValues(t, msg, msgs[0])
+	assert.EqualValues(t, msg, msgs[1])
 	assert.Nil(t, err2, "get message error")
 }
 
