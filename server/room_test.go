@@ -3,8 +3,7 @@ package main
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-"time"
-	"github.com/go/src/fmt"
+	"time"
 )
 
 func TestCurrentTab(t *testing.T) {
@@ -104,7 +103,6 @@ func TestMsg(t *testing.T) {
 	maxMsgID, err := getMaxMessageID(roomID)
 
 	msgs, err2 := getMessages(roomID, maxMsgID, 1)
-	fmt.Print(msgs)
 	assert.EqualValues(t, msg, msgs[0])
 	assert.Nil(t, err2, "get message error")
 }
