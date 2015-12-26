@@ -52,6 +52,8 @@ func getMessages(roomID int, lastID int64, limit int64) ([]Message, error) {
 	startID := lastID - limit
 	if startID <= 0 {
 		startID = 0
+	} else {
+		startID = startID + 1
 	}
 
 	var rawPacket []string
