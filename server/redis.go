@@ -38,9 +38,9 @@ func NewRDBpool(address string) *RDBpool {
 			c, err := redis.DialTimeout(
 				"tcp",
 				address,
-				time.Duration(5)*time.Second,
-				time.Duration(5)*time.Second,
-				time.Duration(5)*time.Second,
+				time.Duration(1)*time.Second,
+				time.Duration(1)*time.Second,
+				time.Duration(1)*time.Second,
 			)
 			if err != nil {
 				return nil, err
@@ -49,6 +49,13 @@ func NewRDBpool(address string) *RDBpool {
 			return c, err
 		},
 	}
+
+	conn := pool.Get()
+	defer conn.Close()
+	if conn.Err() != nil {
+		panic("Can not connect to redis")
+	}
+
 	return &RDBpool{pool: pool}
 }
 
@@ -131,9 +138,16 @@ func (db *RDB) ZREVRANGE(out interface{}, args ...interface{}) error {
 	return err
 }
 
-// ZREVRANGEBYSCORE k offset limit
+// ZREVRANGEBYSCORE k start end
 func (db *RDB) ZREVRANGEBYSCORE(out interface{}, args ...interface{}) error {
 	values, err := redis.Values(db.conn.Do("ZREVRANGEBYSCORE", args...))
+	redis.ScanSlice(values, out)
+	return err
+}
+
+// ZREVRANGEBYSCORE k start end
+func (db *RDB) ZRANGEBYSCORE(out interface{}, args ...interface{}) error {
+	values, err := redis.Values(db.conn.Do("ZRANGEBYSCORE", args...))
 	redis.ScanSlice(values, out)
 	return err
 }

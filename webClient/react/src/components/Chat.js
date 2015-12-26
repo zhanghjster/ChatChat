@@ -3,10 +3,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux'
 
-import {chatInitialize, tabInitialize, changeTab, createRoom, showCreateRoom} from '../actions';
+import {
+    chatInitialize, tabInitialize, changeTab,
+    createRoom, showCreateRoom, sendMessage
+} from '../actions';
 import history from '../utils/history.js';
 import {ChatLeftSide, RoomList, MessageList, ChatMiddleSide, ChatRightSide} from './index';
-import { authCheck } from '../utils';
+import { authCheck } from '../utils/auth.js';
 import {TAB_LOBBY, TAB_ROOM} from '../constants';
 
 class Chat extends React.Component {
@@ -57,7 +60,10 @@ class Chat extends React.Component {
                 );
                 break;
             case TAB_ROOM:
-                list = (<MessageList title={currentTab.Name}/>);
+                list = (<MessageList
+                    title={currentTab.Name}
+                    messageList={chatProps.messageList}
+                    messageSendHandler={(message) => {this.props.dispatch(sendMessage(message))}}/>);
                 break;
         }
 

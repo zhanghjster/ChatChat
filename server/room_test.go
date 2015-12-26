@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestCurrentTab(t *testing.T) {
@@ -28,7 +29,7 @@ func TestCurrentTab(t *testing.T) {
 func TestRoomRaw(t *testing.T) {
 	userID := 1
 
-	roomRaw := &RoomRaw{
+	roomRaw := &RoomData{
 		Name:        "Benx's second room",
 		OwnerID:     userID,
 		IsPrivate:   true,
@@ -54,7 +55,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	userID := 1
 	roomID := 1
 
-	suc, err := peerJoinRoom(userID, roomID)
+	suc, err := userJoinRoom(userID, roomID)
 
 	assert.Nil(t, err, "peer join room err check")
 	assert.True(t, suc, "peer join room suc check")
@@ -64,7 +65,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.True(t, exists, "peer in room")
 
 
-	suc1, err1 := peerLeaveRoom(userID, roomID)
+	suc1, err1 := userLeaveRoom(userID, roomID)
 	assert.Nil(t, err1, "peer leave room err check")
 	assert.True(t, suc1, "peer leave room suc check")
 
@@ -83,12 +84,27 @@ func TestMsg(t *testing.T) {
 
 	roomID := 1
 	username := "benx"
+	peerID := 1
 
-	_, err := saveMessage(username, roomID, "how are you????")
-	assert.Nil(t, err, "save messsage err")
+	id, err := nextMsgID(roomID)
+	assert.Nil(t, err, "next message id")
+	msg := Message{
+		ID: id,
+		RoomID: roomID,
+		Action: TypeTalk,
+		Username: username,
+		Time: time.Now().Format(TIME_LAYOUT),
+		PeerID: peerID,
+	}
 
-	_, err1 := getMessages(roomID, 10, 10)
-	assert.Nil(t, err1, "get message error")
+	err1 := saveMessage(&msg)
+	assert.Nil(t, err1, "save messsage err")
+
+	maxMsgID, err := getMaxMessageID(roomID)
+
+	msgs, err2 := getMessages(roomID, maxMsgID, 1)
+	assert.EqualValues(t, msg, msgs[0])
+	assert.Nil(t, err2, "get message error")
 }
 
 func TestUserStatus(t *testing.T) {
@@ -96,7 +112,7 @@ func TestUserStatus(t *testing.T) {
 	userID := 1
 	status := PEER_BUSY
 
-	err := setUserStatus(userID, status)
+	err := saveUserStatus(userID, status)
 	assert.Nil(t, err, "set user status err")
 
 	status1, err1 := gerUserStatus(userID)

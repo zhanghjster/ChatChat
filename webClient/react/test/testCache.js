@@ -6,7 +6,6 @@ var expect = require("expect"),
 
 import roomData from "../src/utils/roomData.js";
 import {arrayContains} from "../src/utils";
-
 describe('misc test', () => {
     it('roomData function ', () => {
         let room_id = 1;
@@ -54,5 +53,20 @@ describe('misc test', () => {
         a["lee"] = true;
         let b = Object.assign({}, a, { "ben": true});
         assert(b["lee"] && b["ben"], " ben and lee should be true")
+    })
+
+    it('member map', () => {
+        let m1 = { "userID": 1, "Status": "a"};
+        let m2 = { "userID": 2, "Status": "b"};
+
+        let ms = [m1, m2];
+
+        let ms2 = ms.map((m) => {
+            if (m.userID == 1)  {
+                m.Status = "c";
+            }
+            return m;
+        })
+        assert(ms2[0].Status, "c")
     })
 })

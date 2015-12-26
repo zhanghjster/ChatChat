@@ -2,7 +2,7 @@
  * Created by ben on 15/11/18.
  */
 import roomData from './roomData';
-import history from './history';
+
 
 let createReducer = (initialState, reducerMap) => {
     return (state = initialState, action) => {
@@ -44,17 +44,9 @@ let  arrayContains = (array, obj) => {
     return false;
 }
 
-let authCheck = (authenticated, failUrl, sucUrl) => {
-    console.log(authenticated);
-    if (!authenticated) {
-        console.log("goto " + failUrl);
-        history.pushState(null, failUrl);
-    } else if (typeof sucUrl != "undefined") {
-        history.pushState(null, sucUrl);
-    }
-}
+
 
 export {
     createReducer, createConstants, checkHttpStatus, parseJSON,
-     roomData, arrayContains, authCheck
+     roomData, arrayContains
 };
