@@ -116,6 +116,10 @@ func createRoomEndPoint(c *gin.Context) {
 		return
 	}
 
+	if peer, ok := peers.get(userID64.(int)); ok {
+		peer.joinRoom(roomID)
+	}
+
 	// return roomid and name
 	c.JSON(http.StatusOK, gin.H{
 		"ID": roomID, "Name": json.Name,
@@ -204,6 +208,13 @@ func chatEndPoint(c *gin.Context) {
 
 	peer := NewPeer(ws, userID, username)
 
+	if err := peer.setStatus(PEER_AVAILABLE); err !=nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ERROR": "INTERNAL_SERVER_ERROR",
+		})
+		return
+	}
+
 	for _, id := range roomIDs {
 		if suc := peer.joinRoom(id); !suc {
 			if ok,_ := roomExist(id); ok {
@@ -211,10 +222,11 @@ func chatEndPoint(c *gin.Context) {
 				peer.joinRoom(id)
 			}
 		}
+		peer.sayHi(id)
 	}
 
 	go peer.read()
-	peer.talk()
+	peer.readMessage()
 }
 
 func chatInitializeEndPoint(c *gin.Context) {
@@ -291,7 +303,7 @@ func roomInitializeEndPoint(c *gin.Context) {
 		return
 	}
 
-	messages, err := getMessages(roomID, maxMsgID, 10)
+	messages, err := getMessages(roomID, maxMsgID, 20)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "NO_MESSAGE_FOUND"})
 		return

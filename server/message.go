@@ -1,18 +1,20 @@
 package main
 import (
-"strconv"
-"encoding/json"
-"github.com/garyburd/redigo/redis"
+	"strconv"
+	"encoding/json"
+	"github.com/garyburd/redigo/redis"
 )
 
 const (
-	TypePacket = 1
+	TypeTalk = 1
+	TypeStatusUpdate = 2
 )
+
 type Message struct {
 	ID		int64  `json:"i"`
 	Action  int    `json:"a"`
 	PeerID  int    `json:"p"`
-	Message string `json:"m"`
+	Content string `json:"c"`
 	RoomID  int		`json:"r"`
 	Time    string  `json:"t"`
 	Username string `json:"u"`
@@ -53,8 +55,8 @@ func getMessages(roomID int, lastID int64, limit int64) ([]Message, error) {
 	}
 
 	var rawPacket []string
-	err := db.ZREVRANGEBYSCORE(&rawPacket, genRedisKey(ROOM_MSG_CACHE_PRE, strconv.Itoa(roomID)),
-		lastID, startID,
+	err := db.ZRANGEBYSCORE(&rawPacket, genRedisKey(ROOM_MSG_CACHE_PRE, strconv.Itoa(roomID)),
+		startID, lastID,
 	)
 	if err != nil {
 		return nil, err

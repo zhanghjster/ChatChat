@@ -4,8 +4,15 @@ import (
 	"log"
 	"time"
 	"encoding/json"
-"strconv"
-"errors"
+	"strconv"
+	"errors"
+	"sync"
+)
+
+const (
+	PEER_AVAILABLE   = "available"
+	PEER_UNAVAILABLE = "unavailable"
+	PEER_BUSY        = "busy"
 )
 
 type Peer struct {
@@ -19,10 +26,34 @@ type Peer struct {
 	exitChan chan int
 	roomExitChan chan *Room
 	username string
+	Status string
+}
+
+type Peers struct {
+	sync.RWMutex
+	peers map[int]*Peer
+}
+
+func (ps *Peers) get(id int) (*Peer, bool) {
+	ps.RLock()
+	ps.RUnlock()
+
+	peer, ok := ps.peers[id]
+	return peer, ok
+}
+
+func (ps *Peers) set(peer *Peer) {
+	ps.Lock()
+	ps.Unlock()
+	ps.peers[peer.ID] = peer
+}
+
+var peers = &Peers{
+	peers: make(map[int]*Peer),
 }
 
 func NewPeer(ws *websocket.Conn, id int, username string) *Peer {
-	return &Peer{
+	peer := &Peer{
 		sendChan: make(chan []byte),
 		ws:       ws,
 		ID:       id,
@@ -32,6 +63,10 @@ func NewPeer(ws *websocket.Conn, id int, username string) *Peer {
 		roomExitChan: make(chan *Room),
 		username: username,
 	}
+
+	peers.set(peer);
+
+	return peer;
 }
 
 func (p *Peer) write(messageType int, payload []byte) error {
@@ -79,15 +114,16 @@ func (p *Peer) read() {
 	}
 }
 
-// talk message to other member
-func (p *Peer) talk() {
+// read message from conn and talk
+func (p *Peer) readMessage() {
 	defer func() {
 		close(p.exitChan)
 		p.ws.Close()
 	}()
 
 	for {
-		_, message, err := p.ws.ReadMessage()
+		message := &Message{}
+		err := p.ws.ReadJSON(message)
 		if err != nil {
 			break
 		}
@@ -96,52 +132,63 @@ func (p *Peer) talk() {
 	}
 }
 
-func (p *Peer) processMessage(message []byte) {
+func (p *Peer) sayHi(roomID int) {
+	message := &Message{
+		Action: TypeStatusUpdate,
+		RoomID: roomID,
+		Content: p.Status,
+	}
+	p.processMessage(message)
+}
 
+func (p *Peer) setStatus(status string) error {
+	p.Status = status
+	return saveUserStatus(p.ID, status)
+}
 
-	data := &Message{}
-	s := string(message[:])
-	log.Println("string is " + s)
+func (p *Peer) processMessage(message *Message) error {
 
-	// parse the message
-	err := json.Unmarshal(message, data)
+	log.Println("message is ", message)
+
+	room, ok := p.rooms[message.RoomID]
+	if !ok {
+		return errors.New("NO ROON")
+	}
+
+	message.PeerID = p.ID
+
+	switch int(message.Action) {
+	case TypeTalk:
+		if len(message.Content) == 0 {
+			return nil
+		}
+
+		nextMsgID, err := nextMsgID(message.RoomID)
+		if err != nil {
+			return err
+		}
+
+		message.ID = nextMsgID
+		message.Username = p.username
+		message.Time = time.Now().Format(TIME_LAYOUT)
+
+		if  err := saveMessage(message); err != nil {
+			return err
+		}
+	case TypeStatusUpdate:
+		message.Content = p.Status
+	}
+
+	// sent message to peers
+	msg, err := json.Marshal(message)
 	if err != nil {
-		return
+		return err
 	}
-
-	switch int(data.Action) {
-	case TypePacket:
-		if len(data.Message) == 0 {
-			return
-		}
-
-		if room, exists := p.rooms[data.RoomID]; exists {
-
-			nextMsgID, err := nextMsgID(data.RoomID)
-			if err != nil {
-				return
-			}
-
-			data.ID = nextMsgID
-			data.Action = TypePacket
-			data.RoomID = data.RoomID
-			data.PeerID = p.ID
-			data.Username = p.username
-			data.Time = time.Now().Format(TIME_LAYOUT)
-			if  err := saveMessage(data); err != nil {
-				return
-			}
-
-			msg, err := json.Marshal(data)
-			if err != nil {
-				return
-			}
-			select {
-			case room.broadcastChan <- msg:
-			case <- room.exitChan:
-			}
-		}
+	select {
+	case room.broadcastChan <- msg:
+	case <- room.exitChan:
 	}
+	return nil
 }
 
 func (p *Peer) joinRoom(roomID int) (suc bool) {

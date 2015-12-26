@@ -34,7 +34,22 @@ class RoomData  {
     }
 
     getMember(roomID, userID) {
+        if (this._members[roomID] == null) {
+            return null;
+        }
         return this._members[roomID][userID];
+    }
+
+    updateMemberStatus(roomID, userID, status) {
+        if (this._members[roomID] == null) {
+            return;
+        }
+
+        let member = this._members[roomID][userID];
+        if (member == null) {
+            return;
+        }
+        member["Status"] = status;
     }
 
     getMembers(roomID) {

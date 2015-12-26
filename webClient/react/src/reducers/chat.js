@@ -11,7 +11,7 @@ import {
     MEMBER_ACTIVE, MEMBER_UNACTIVE, MEMBER_JOIN, MEMBER_LEAVE,
     TAB_LOBBY, TAB_ROOM, TAB_PEER,
     CHANGE_TAB, LOGOUT, ROOM_CREATED,
-    LOBBY_INITIALIZE_SUCCESS, ROOM_INITIALIZE_SUCCESS
+    LOBBY_INITIALIZE_SUCCESS, ROOM_INITIALIZE_SUCCESS, MEMBER_STATUS_UPDATE
 } from "../constants";
 
 var tabInitialState = {
@@ -149,6 +149,15 @@ var memberList = createReducer([], {
     [TAB_CHANGED]: (state, payload) => {
         return [...payload.memberList];
     },
+    [MEMBER_STATUS_UPDATE]: (state, payload) => {
+        let members = state.map((m) => {
+            if (m.userID == payload.userID) {
+                m.status = payload.status;
+            }
+            return m;
+        });
+        return [...members];
+    }
 })
 
 var lobbyRoomList = createReducer([], {

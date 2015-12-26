@@ -44,7 +44,7 @@ export default class MessageList extends React.Component {
             return (
                 <div className="group-rom">
                     <div className={firstPartClass}>{message.u}</div>
-                    <div className="second-part">{message.m}</div>
+                    <div className="second-part">{message.c}</div>
                     <div className="third-part">{message.t}</div>
                 </div>
             )

@@ -8,9 +8,6 @@ import (
 )
 
 const (
-	PEER_AVAILABLE   = "available"
-	PEER_UNAVAILABLE = "unavailable"
-	PEER_BUSY        = "busy"
 	TAB_LOBBY = "TAB_LOBBY"
 	TAB_ROOM  = "TAB_ROOM"
 	TAB_PEER  = "TAB_PEER"

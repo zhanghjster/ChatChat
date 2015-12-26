@@ -10,7 +10,7 @@ import {
     TAB_INITIALIZE_SUCCESS, TAB_INITIALIZE_FAIL,
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
-    ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL
+    ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL, MEMBER_STATUS_UPDATE,
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -20,10 +20,8 @@ var WS_BASE  = "ws://localhost:3001/api/v1/start_chat";
 
 let WS = null;
 
-let PACKET_MESSAGE      = 1;
-let PACKET_PEER_JOIN    = 2;
-let PACKET_PEER_LEFT    = 3;
-let PACKET_PEER_STATUS  = 4;
+let TYPE_TALK             = 1;
+let TYPE_STATUS_UPDATE    = 2;
 
 // login
 export function login(username, password) {
@@ -216,22 +214,32 @@ function processMessage(dispatch, getState, message) {
     let tabType = state.chat.currentTab.Type;
     console.log(message);
     switch (message.a) {
-        case PACKET_MESSAGE:
+        case TYPE_TALK:
             if (tabType == TAB_ROOM) {
                 if ( tabID == message.r ) {
-                    roomData.addMessage(message.r, message);
+                    dispatch({
+                        type: NEW_MESSAGE,
+                        payload: {
+                            message: message
+                        }
+                    });
                 }
-                dispatch({
-                    type: NEW_MESSAGE,
-                    payload: {
-                        message: message
-                    },
-                });
+                roomData.addMessage(message.r, message);
             }
             break;
-        case PACKET_PEER_JOIN:
-            break;
-        case PACKET_PEER_LEFT:
+        case TYPE_STATUS_UPDATE:
+            if (tabType == TAB_ROOM) {
+                if (tabID == message.r) {
+                    dispatch({
+                        type: MEMBER_STATUS_UPDATE,
+                        payload: {
+                            userID: message.p,
+                            status: message.c
+                        }
+                    })
+                }
+                roomData.updateMemberStatus(message.r, message.p, message.c);
+            }
             break;
     }
 }
@@ -242,9 +250,9 @@ export function sendMessage(message) {
         let roomID = state.chat.currentTab.ID;
         if (WS != null) {
             WS.send(JSON.stringify({
-                a: PACKET_MESSAGE,
+                a: TYPE_TALK,
                 r: roomID,
-                m: message,
+                c: message,
             }));
         }
     };

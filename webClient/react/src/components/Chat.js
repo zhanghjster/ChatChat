@@ -9,7 +9,7 @@ import {
 } from '../actions';
 import history from '../utils/history.js';
 import {ChatLeftSide, RoomList, MessageList, ChatMiddleSide, ChatRightSide} from './index';
-import { authCheck } from '../utils';
+import { authCheck } from '../utils/auth.js';
 import {TAB_LOBBY, TAB_ROOM} from '../constants';
 
 class Chat extends React.Component {

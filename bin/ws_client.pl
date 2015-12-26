@@ -27,7 +27,7 @@ $ua->websocket( $ws_api => sub {
     print Dumper($tx->res->body);
 
     $tx->send({ json => {
-        a => 1, m => "test message", r => 71
+        a => 1, c => "test message", r => 71
     }});
 });
 

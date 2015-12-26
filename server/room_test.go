@@ -92,7 +92,7 @@ func TestMsg(t *testing.T) {
 	msg := Message{
 		ID: id,
 		RoomID: roomID,
-		Action: TypePacket,
+		Action: TypeTalk,
 		Username: username,
 		Time: time.Now().Format(TIME_LAYOUT),
 		PeerID: peerID,
@@ -114,7 +114,7 @@ func TestUserStatus(t *testing.T) {
 	userID := 1
 	status := PEER_BUSY
 
-	err := setUserStatus(userID, status)
+	err := saveUserStatus(userID, status)
 	assert.Nil(t, err, "set user status err")
 
 	status1, err1 := gerUserStatus(userID)

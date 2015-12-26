@@ -7,6 +7,7 @@ import (
 "errors"
 )
 
+
 type User struct {
 	Username         string `redis:"username"`
 	Password         string `redis:"password"`
@@ -86,7 +87,7 @@ func gerUserStatus(userID int) (string, error) {
 	return status, nil
 }
 
-func setUserStatus(userID int, status string) error {
+func saveUserStatus(userID int, status string) error {
 	db := rdbPool.Get()
 	defer db.Close()
 
