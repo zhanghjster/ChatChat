@@ -8,6 +8,8 @@ import (
 const (
 	TypeTalk = 1
 	TypeStatusUpdate = 2
+	TypePeerJoin = 3
+	TypePeerLeave = 4
 )
 
 type Message struct {

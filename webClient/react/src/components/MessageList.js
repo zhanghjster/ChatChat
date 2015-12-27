@@ -37,19 +37,34 @@ export default class MessageList extends React.Component {
         ul.scrollTop = ul.scrollHeight;
     }
 
-    render() {
-        let messageList = this.props.messageList;
-        let messageItems = messageList.map( (message, index) => {
-            let firstPartClass = (index%2 == 0) ? "first-part" : "first-part odd";
+    _messageItems() {
+        return this.props.messageList.map( (message, index) => {
+            let firstPartClass = "first-part"
+            let firstPart = "", secondPart = "";
+
+            if (message.a == 3) {
+                secondPart = message.u + " joined room ";
+            } else if (message.a == 4) {
+                secondPart = message.u + " left room ";
+            } else {
+                firstPart = message.u;
+                secondPart = message.c;
+                firstPartClass = (index%2 == 0) ? "first-part" : "first-part odd";
+            }
+
             return (
                 <div className="group-rom">
-                    <div className={firstPartClass}>{message.u}</div>
-                    <div className="second-part">{message.c}</div>
+                    <div className={firstPartClass}>{firstPart}</div>
+                    <div className="second-part">{secondPart}</div>
                     <div className="third-part">{message.t}</div>
                 </div>
             )
         });
 
+    }
+
+    render() {
+        let messageItems = this._messageItems()
         return (
             <div>
                 <div className="chat-room-head">

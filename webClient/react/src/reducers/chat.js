@@ -85,13 +85,16 @@ var roomList = createReducer([], {
             ...state.slice(payload.index + 1)
         ];
     },
-    [JOIN_ROOM]: (state, payload) => {
+    [ROOM_CREATED]: (state, payload) => {
         return [
-            payload.room,
+            {
+                ID: payload.ID,
+                Name: payload.Name
+            },
             ...state,
         ];
     },
-    [ROOM_CREATED]: (state, payload) => {
+    [JOIN_ROOM]: (state, payload) => {
         return [
             {
                 ID: payload.ID,
@@ -151,8 +154,10 @@ var memberList = createReducer([], {
     },
     [MEMBER_STATUS_UPDATE]: (state, payload) => {
         let members = state.map((m) => {
-            if (m.userID == payload.userID) {
-                m.status = payload.status;
+            if (m.id == payload.id) {
+                return Object.assign({}, m, {
+                    status: payload.status,
+                });
             }
             return m;
         });

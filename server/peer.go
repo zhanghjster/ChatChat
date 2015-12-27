@@ -1,12 +1,11 @@
 package main
 import (
 	"github.com/gorilla/websocket"
-	"log"
 	"time"
 	"encoding/json"
-	"strconv"
 	"errors"
 	"sync"
+	"github.com/go/src/fmt"
 )
 
 const (
@@ -101,16 +100,19 @@ func (p *Peer) read() {
 			}
 			continue
 		case <- p.exitChan:
+			fmt.Println("go to exit")
 			goto exit
 		}
 	}
 
 	exit:
 	for _, room := range p.rooms {
+		p.sayBye(room.ID)
 		select {
 		case room.unregisterChan <- p:
 		case <- room.exitChan:
 		}
+
 	}
 }
 
@@ -141,14 +143,22 @@ func (p *Peer) sayHi(roomID int) {
 	p.processMessage(message)
 }
 
+func (p *Peer) sayBye(roomID int) {
+	message := &Message{
+		Action: TypeStatusUpdate,
+		RoomID: roomID,
+		Content: PEER_UNAVAILABLE,
+	}
+	p.processMessage(message)
+}
+
 func (p *Peer) setStatus(status string) error {
 	p.Status = status
 	return saveUserStatus(p.ID, status)
 }
 
 func (p *Peer) processMessage(message *Message) error {
-
-	log.Println("message is ", message)
+	fmt.Println(p.ID, " send message ", message.Content , "to ", message.RoomID)
 
 	room, ok := p.rooms[message.RoomID]
 	if !ok {
@@ -177,6 +187,9 @@ func (p *Peer) processMessage(message *Message) error {
 		}
 	case TypeStatusUpdate:
 		message.Content = p.Status
+	case TypePeerJoin , TypePeerLeave:
+		message.Username = p.username
+		message.Time = time.Now().Format(TIME_LAYOUT)
 	}
 
 	// sent message to peers
@@ -224,35 +237,4 @@ func (p *Peer) leaveRoom(roomID int) {
 	case room.unregisterChan <- p:
 	case <- room.exitChan:
 	}
-}
-
-func peerInRoom(userID, roomID int) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	if exists, _ := roomExist(roomID); !exists {
-		return false, errors.New("room not exists")
-	}
-
-	if _, err := db.ZRANK(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
-		return false, err
-	}
-
-	if _, err := db.ZRANK(genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), userID); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func getPeerIDofRoom(roomID int) (*[]int, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	var peerID []int
-	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
-		return nil, err
-	}
-
-	return &peerID, nil
 }

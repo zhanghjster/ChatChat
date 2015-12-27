@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 	"sync"
+"fmt"
 )
 
 const (
@@ -96,6 +97,7 @@ func (r *Room) run() {
 		select {
 		case peer := <- r.registerChan:
 			r.peers[peer] = true;
+			fmt.Println(peer.ID, " join ", r.ID)
 			continue
 
 		case peer := <- r.unregisterChan:
@@ -108,6 +110,7 @@ func (r *Room) run() {
 				case peer.sendChan <- message:
 				case <- peer.exitChan:
 				}
+
 			}
 			continue
 		case <- r.exitChan:

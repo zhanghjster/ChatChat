@@ -60,7 +60,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.Nil(t, err, "peer join room err check")
 	assert.True(t, suc, "peer join room suc check")
 
-	exists, err1 := peerInRoom(userID, roomID)
+	exists, err1 := userInRoom(userID, roomID)
 	assert.Nil(t, err1, "peer in room error check")
 	assert.True(t, exists, "peer in room")
 
@@ -69,7 +69,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.Nil(t, err1, "peer leave room err check")
 	assert.True(t, suc1, "peer leave room suc check")
 
-	_, err3 := peerInRoom(userID, roomID)
+	_, err3 := userInRoom(userID, roomID)
 	assert.NotNil(t, err3, "peer in room error check")
 }
 

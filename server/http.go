@@ -58,6 +58,7 @@ func (s *HttpServer) Serve() {
 		v1.POST("/login", loginEndpoint)
 		v1.POST("/signup", signupEndPoint)
 		v1.POST("/create_room", authCheck(), createRoomEndPoint)
+		v1.POST("/join_room", authCheck(), joinRoomEndPoint)
 	}
 
 	r.LoadHTMLGlob("../webClient/templates/*")
@@ -123,6 +124,47 @@ func createRoomEndPoint(c *gin.Context) {
 	// return roomid and name
 	c.JSON(http.StatusOK, gin.H{
 		"ID": roomID, "Name": json.Name,
+	})
+}
+
+func joinRoomEndPoint (c *gin.Context) {
+	var json = &struct{
+		RoomID int `form:"roomID" json:"roomID"`
+	}{}
+
+	if c.BindJSON(json) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ERR":"NEED_ROOMID"})
+		return
+	}
+
+	userID64, _ := c.Get("userID")
+
+	roomID := json.RoomID
+
+	fmt.Println("room id is ", roomID)
+
+	if exists, _:= roomExist(roomID); !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"ERR":"ROOM_UNEXIST"})
+		return
+	}
+
+	userJoinRoom(userID64.(int), roomID)
+
+	if peer, ok := peers.get(userID64.(int)); ok {
+		if suc := peer.joinRoom(roomID); !suc {
+			if ok,_ := roomExist(roomID); ok {
+				// another try
+				peer.joinRoom(roomID)
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"ERR":"ROOM_UNEXIST"})
+				return
+			}
+		}
+		peer.sayHi(roomID)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"ID": roomID,
 	})
 }
 
@@ -227,6 +269,9 @@ func chatEndPoint(c *gin.Context) {
 
 	go peer.read()
 	peer.readMessage()
+
+	// exit
+	peer.setStatus(PEER_UNAVAILABLE)
 }
 
 func chatInitializeEndPoint(c *gin.Context) {
@@ -251,6 +296,8 @@ func chatInitializeEndPoint(c *gin.Context) {
 	if currentTab.Type == "" {
 		currentTab.Type = TAB_LOBBY
 	}
+
+	saveUserStatus(userID, PEER_AVAILABLE)
 
 	c.JSON(http.StatusOK, gin.H{
 		"currentTab": currentTab,
@@ -309,15 +356,15 @@ func roomInitializeEndPoint(c *gin.Context) {
 		return
 	}
 
-	peerID, err := getPeerIDofRoom(roomID)
+	peerID, err := getUserIdOfRoom(roomID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "NO_PEER_FOUND"})
 		return
 	}
 
-	var peers = make([]interface{}, len(*peerID))
+	var peers = make([]interface{}, len(peerID))
 
-	for i, id := range *peerID {
+	for i, id := range peerID {
 		username, _ := getUsername(id)
 		status, _ := gerUserStatus(id)
 		peers[i] = struct {
@@ -330,6 +377,8 @@ func roomInitializeEndPoint(c *gin.Context) {
 			Status:   status,
 		}
 	}
+
+	fmt.Println("peers ", peers)
 
 	c.JSON(http.StatusOK, gin.H{
 		"messageList": messages,
