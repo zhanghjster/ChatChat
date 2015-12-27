@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"sync"
-	"github.com/go/src/fmt"
+	"fmt"
 )
 
 const (

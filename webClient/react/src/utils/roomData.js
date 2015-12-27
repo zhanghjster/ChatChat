@@ -11,7 +11,6 @@ class RoomData  {
     }
 
     addMember(roomID, member) {
-        console.log(member);
         if (this._members[roomID] == null) {
             this._members[roomID] = {};
         }

@@ -67,8 +67,6 @@ class Chat extends React.Component {
                 break;
         }
 
-        console.log(this.props.chat.memberList);
-
         return (
             <div className="chat-room">
                 <ChatLeftSide

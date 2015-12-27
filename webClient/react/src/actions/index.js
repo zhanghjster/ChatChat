@@ -430,7 +430,7 @@ export function createRoom(data) {
                     ID: response.ID, Name: response.Name,
                 }
             });
-            console.log(response);
+
             dispatch(changeTab(TAB_ROOM, response.ID, data.name));
         }).catch(err => {
             if (err.response != null) {
@@ -448,7 +448,6 @@ export function joinRoom(id, name) {
     return (dispatch, getState) => {
         let state = getState();
         let token = state.auth.token;
-        console.log("room id " + id);
         fetch(API_BASE + "/join_room", {
             method: 'post',
             headers: {
@@ -464,7 +463,6 @@ export function joinRoom(id, name) {
                     ID: id, Name: name,
                 }
             });
-            console.log(response);
             dispatch(changeTab(TAB_ROOM, id, name));
         }).catch(err => {
             if (err.response != null) {
