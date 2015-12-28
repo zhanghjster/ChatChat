@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"strconv"
-	"time"
 	"sync"
+	"time"
 )
 
 const (
@@ -32,11 +33,11 @@ type Room struct {
 	hash  string
 	peers map[*Peer]bool
 
-	broadcastChan chan []byte
-	registerChan  chan *Peer
+	broadcastChan  chan []byte
+	registerChan   chan *Peer
 	unregisterChan chan *Peer
-	exitChan		chan int
-	time int
+	exitChan       chan int
+	time           int
 }
 
 type Rooms struct {
@@ -69,9 +70,9 @@ func NewRoom(roomID int) *Room {
 	room := &Room{
 		ID: roomID,
 
-		broadcastChan:  make(chan []byte),
-		registerChan: make(chan *Peer),
-		peers: make(map[*Peer]bool),
+		broadcastChan: make(chan []byte),
+		registerChan:  make(chan *Peer),
+		peers:         make(map[*Peer]bool),
 
 		exitChan: make(chan int),
 
@@ -84,7 +85,7 @@ func NewRoom(roomID int) *Room {
 	return room
 }
 
-func (r *Room) addPeer(peer *Peer)  {
+func (r *Room) addPeer(peer *Peer) {
 	r.Lock()
 	r.peers[peer] = true
 	r.Unlock()
@@ -94,35 +95,37 @@ func (r *Room) run() {
 
 	for {
 		select {
-		case peer := <- r.registerChan:
-			r.peers[peer] = true;
+		case peer := <-r.registerChan:
+			r.peers[peer] = true
+			fmt.Println(peer.ID, " join ", r.ID)
 			continue
 
-		case peer := <- r.unregisterChan:
+		case peer := <-r.unregisterChan:
 			delete(r.peers, peer)
 			continue
 
 		case message := <-r.broadcastChan:
 			for peer := range r.peers {
-				select{
+				select {
 				case peer.sendChan <- message:
-				case <- peer.exitChan:
+				case <-peer.exitChan:
 				}
+
 			}
 			continue
-		case <- r.exitChan:
+		case <-r.exitChan:
 			rooms.del(r.ID)
 			for peer := range r.peers {
 				select {
 				case peer.roomExitChan <- r:
-				case <- peer.exitChan:
+				case <-peer.exitChan:
 				}
 			}
 			goto exit
 		}
 	}
 
-	exit:
+exit:
 }
 
 func (r *Room) broadcastPacket(message []byte) {
@@ -223,12 +226,8 @@ func getRoomRaw(roomID int) (*RoomData, error) {
 	return roomRaw, nil
 }
 
-
-
 func roomExist(roomID int) (bool, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 	return db.EXISTS(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(roomID)))
 }
-
-

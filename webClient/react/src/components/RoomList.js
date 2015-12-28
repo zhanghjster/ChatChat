@@ -18,7 +18,10 @@ export default class RoomList extends React.Component {
                     <p>
                         <span className="text-muted">Admin :</span> {room.OwnerName} |
                         <span className="text-muted">Members :</span> {room.Members} |
-                        <span className="text-muted">Last Activity :</span> {room.LastUpdateTime}
+                        <span className="text-muted">Last Activity :</span> {room.LastUpdateTime} |
+                        <span className="text-muted">
+                            <a href="#" onClick={() => {this.props.joinRoom(room.ID, room.Name)}}>Join</a>
+                        </span>
                     </p>
                 </div>
             )

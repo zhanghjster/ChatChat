@@ -14,21 +14,22 @@ if (token != null) {
 }
 
 if ( __DEV__ ) {
-    let ReduxDevTool  = require('./components/ReduxDevTool');
+    const { DevTools, DebugPanel, LogMonitor } = require('redux-devtools/lib/react');
+    let debugPannel = (<DebugPanel top right bottom><DevTools store={store} monitor={LogMonitor} /></DebugPanel>);
     ReactDOM.render(
-        <div classNmae='container'>
-            <div  className="row">
-                <div className="col-sm-12">
-                    <Provider store={store}>
-                        {routes}
-                    </Provider>
+            <div classNmae='container'>
+                    <div  className="row">
+                        <div className="col-md-10">
+                            <Provider store={store}>
+                                {routes}
+                            </Provider>
+                        </div>
+                        <div className="col-md-2">{ debugPannel }</div>
+                    </div>
                 </div>
-            </div>
-            <ReduxDevTool store={store}></ReduxDevTool>
-        </div>
-        ,
-        document.getElementById("APP")
-    );
+            ,
+            document.getElementById("APP")
+        );
 } else {
     ReactDOM.render(
         <div>

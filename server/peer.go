@@ -1,12 +1,12 @@
 package main
+
 import (
-	"github.com/gorilla/websocket"
-	"log"
-	"time"
 	"encoding/json"
-	"strconv"
 	"errors"
+	"fmt"
+	"github.com/gorilla/websocket"
 	"sync"
+	"time"
 )
 
 const (
@@ -16,17 +16,17 @@ const (
 )
 
 type Peer struct {
-	ID     int
+	ID int
 	// Chan for send message
 	sendChan chan []byte
 
 	rooms map[int]*Room
-	ws *websocket.Conn
+	ws    *websocket.Conn
 
-	exitChan chan int
+	exitChan     chan int
 	roomExitChan chan *Room
-	username string
-	Status string
+	username     string
+	Status       string
 }
 
 type Peers struct {
@@ -57,16 +57,16 @@ func NewPeer(ws *websocket.Conn, id int, username string) *Peer {
 		sendChan: make(chan []byte),
 		ws:       ws,
 		ID:       id,
-		rooms: make(map[int]*Room),
-		
-		exitChan: make(chan int),
+		rooms:    make(map[int]*Room),
+
+		exitChan:     make(chan int),
 		roomExitChan: make(chan *Room),
-		username: username,
+		username:     username,
 	}
 
-	peers.set(peer);
+	peers.set(peer)
 
-	return peer;
+	return peer
 }
 
 func (p *Peer) write(messageType int, payload []byte) error {
@@ -93,24 +93,27 @@ func (p *Peer) read() {
 				return
 			}
 			continue
-		case room := <- p.roomExitChan:
+		case room := <-p.roomExitChan:
 			delete(p.rooms, room.ID)
-		case <- ticker.C:
+		case <-ticker.C:
 			if err := p.write(websocket.PingMessage, []byte{}); err != nil {
 				close(p.exitChan)
 			}
 			continue
-		case <- p.exitChan:
+		case <-p.exitChan:
+			fmt.Println("go to exit")
 			goto exit
 		}
 	}
 
-	exit:
+exit:
 	for _, room := range p.rooms {
+		p.sayBye(room.ID)
 		select {
 		case room.unregisterChan <- p:
-		case <- room.exitChan:
+		case <-room.exitChan:
 		}
+
 	}
 }
 
@@ -134,9 +137,18 @@ func (p *Peer) readMessage() {
 
 func (p *Peer) sayHi(roomID int) {
 	message := &Message{
-		Action: TypeStatusUpdate,
-		RoomID: roomID,
+		Action:  TypeStatusUpdate,
+		RoomID:  roomID,
 		Content: p.Status,
+	}
+	p.processMessage(message)
+}
+
+func (p *Peer) sayBye(roomID int) {
+	message := &Message{
+		Action:  TypeStatusUpdate,
+		RoomID:  roomID,
+		Content: PEER_UNAVAILABLE,
 	}
 	p.processMessage(message)
 }
@@ -147,8 +159,7 @@ func (p *Peer) setStatus(status string) error {
 }
 
 func (p *Peer) processMessage(message *Message) error {
-
-	log.Println("message is ", message)
+	fmt.Println(p.ID, " send message ", message.Content, "to ", message.RoomID)
 
 	room, ok := p.rooms[message.RoomID]
 	if !ok {
@@ -172,11 +183,14 @@ func (p *Peer) processMessage(message *Message) error {
 		message.Username = p.username
 		message.Time = time.Now().Format(TIME_LAYOUT)
 
-		if  err := saveMessage(message); err != nil {
+		if err := saveMessage(message); err != nil {
 			return err
 		}
 	case TypeStatusUpdate:
 		message.Content = p.Status
+	case TypePeerJoin, TypePeerLeave:
+		message.Username = p.username
+		message.Time = time.Now().Format(TIME_LAYOUT)
 	}
 
 	// sent message to peers
@@ -186,7 +200,7 @@ func (p *Peer) processMessage(message *Message) error {
 	}
 	select {
 	case room.broadcastChan <- msg:
-	case <- room.exitChan:
+	case <-room.exitChan:
 	}
 	return nil
 }
@@ -222,37 +236,6 @@ func (p *Peer) leaveRoom(roomID int) {
 
 	select {
 	case room.unregisterChan <- p:
-	case <- room.exitChan:
+	case <-room.exitChan:
 	}
-}
-
-func peerInRoom(userID, roomID int) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	if exists, _ := roomExist(roomID); !exists {
-		return false, errors.New("room not exists")
-	}
-
-	if _, err := db.ZRANK(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
-		return false, err
-	}
-
-	if _, err := db.ZRANK(genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), userID); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func getPeerIDofRoom(roomID int) (*[]int, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	var peerID []int
-	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
-		return nil, err
-	}
-
-	return &peerID, nil
 }

@@ -1,22 +1,25 @@
 package main
+
 import (
-	"strconv"
 	"encoding/json"
 	"github.com/garyburd/redigo/redis"
+	"strconv"
 )
 
 const (
-	TypeTalk = 1
+	TypeTalk         = 1
 	TypeStatusUpdate = 2
+	TypePeerJoin     = 3
+	TypePeerLeave    = 4
 )
 
 type Message struct {
-	ID		int64  `json:"i"`
-	Action  int    `json:"a"`
-	PeerID  int    `json:"p"`
-	Content string `json:"c"`
-	RoomID  int		`json:"r"`
-	Time    string  `json:"t"`
+	ID       int64  `json:"i"`
+	Action   int    `json:"a"`
+	PeerID   int    `json:"p"`
+	Content  string `json:"c"`
+	RoomID   int    `json:"r"`
+	Time     string `json:"t"`
 	Username string `json:"u"`
 }
 
@@ -34,14 +37,14 @@ func saveMessage(msg *Message) error {
 
 	packetB, err := json.Marshal(msg)
 	if err != nil {
-		return  err
+		return err
 	}
 
 	if _, err := db.ZADD(genRedisKey(ROOM_MSG_CACHE_PRE, roomIDStr), msg.ID, string(packetB)); err != nil {
 		return err
 	}
 
-	return  nil
+	return nil
 }
 
 func getMessages(roomID int, lastID int64, limit int64) ([]Message, error) {

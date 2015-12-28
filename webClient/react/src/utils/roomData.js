@@ -14,7 +14,7 @@ class RoomData  {
         if (this._members[roomID] == null) {
             this._members[roomID] = {};
         }
-        this._members[roomID][member.userID] = member;
+        this._members[roomID][member.id] = member;
     }
 
     removeMember(roomID, memberID) {
@@ -49,7 +49,7 @@ class RoomData  {
         if (member == null) {
             return;
         }
-        member["Status"] = status;
+        member["status"] = status;
     }
 
     getMembers(roomID) {

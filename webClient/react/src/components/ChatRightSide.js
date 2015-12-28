@@ -9,9 +9,9 @@ import { Link } from 'react-router';
 export default class ChatRightSide extends React.Component {
 
     render() {
+        let memberList = this.props.memberList;
 
-        let memberItems = this.props.memberList.map(member => {
-
+        let memberItems = memberList.map((member) => {
             let statusClass = null;
             switch (member.status) {
                 case "available":

@@ -11,6 +11,7 @@ import {
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
     ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL, MEMBER_STATUS_UPDATE,
+    JOIN_ROOM,
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -22,6 +23,12 @@ let WS = null;
 
 let TYPE_TALK             = 1;
 let TYPE_STATUS_UPDATE    = 2;
+let TYPE_PEER_JOIN        = 3;
+let TYPE_PEER_LEAVE       = 4;
+
+let PEER_AVAILIABLE       = 'available';
+let PEER_UNAVAILABLE      = 'unavailable';
+let PEER_BUSY             = 'busy';
 
 // login
 export function login(username, password) {
@@ -212,36 +219,45 @@ function processMessage(dispatch, getState, message) {
     let state = getState();
     let tabID = state.chat.currentTab.ID;
     let tabType = state.chat.currentTab.Type;
-    console.log(message);
     switch (message.a) {
-        case TYPE_TALK:
-            if (tabType == TAB_ROOM) {
-                if ( tabID == message.r ) {
-                    dispatch({
-                        type: NEW_MESSAGE,
-                        payload: {
-                            message: message
-                        }
-                    });
-                }
-                roomData.addMessage(message.r, message);
-            }
-            break;
         case TYPE_STATUS_UPDATE:
-            if (tabType == TAB_ROOM) {
-                if (tabID == message.r) {
-                    dispatch({
-                        type: MEMBER_STATUS_UPDATE,
-                        payload: {
-                            userID: message.p,
-                            status: message.c
-                        }
-                    })
-                }
-                roomData.updateMemberStatus(message.r, message.p, message.c);
-            }
+            statusUpdate(dispatch,  tabID, message);
+            break;
+        case TYPE_TALK:
+        case TYPE_PEER_JOIN:
+        case TYPE_PEER_LEAVE:
+            messageUpdate(dispatch,  tabID, message);
             break;
     }
+}
+
+function messageUpdate(dispatch, tabID, message) {
+
+    if ( tabID == message.r ) {
+        dispatch({
+            type: NEW_MESSAGE,
+            payload: {
+                message: message
+            }
+        });
+    }
+
+    roomData.addMessage(message.r, message);
+}
+
+function statusUpdate(dispatch, tabID, message) {
+
+    if (tabID == message.r) {
+        dispatch({
+            type: MEMBER_STATUS_UPDATE,
+            payload: {
+                id: message.p,
+                status: message.c
+            }
+        })
+    }
+
+    roomData.updateMemberStatus(message.r, message.p, message.c);
 }
 
 export function sendMessage(message) {
@@ -396,7 +412,6 @@ export function tabInitiallizeFail(tabID) {
 
 export function createRoom(data) {
     return (dispatch, getState) => {
-        console.log(data);
         let state = getState();
         let token = state.auth.token;
         fetch(API_BASE + "/create_room", {
@@ -415,8 +430,40 @@ export function createRoom(data) {
                     ID: response.ID, Name: response.Name,
                 }
             });
-            console.log(response);
+
             dispatch(changeTab(TAB_ROOM, response.ID, data.name));
+        }).catch(err => {
+            if (err.response != null) {
+                err.response.json().then( json => {
+                    console.log(json);
+                })
+            } else {
+                console.log(err);
+            }
+        })
+    }
+}
+
+export function joinRoom(id, name) {
+    return (dispatch, getState) => {
+        let state = getState();
+        let token = state.auth.token;
+        fetch(API_BASE + "/join_room", {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({roomID: id})
+        }).then(checkHttpStatus).then(parseJSON).then(response => {
+            dispatch({
+                type: JOIN_ROOM,
+                payload: {
+                    ID: id, Name: name,
+                }
+            });
+            dispatch(changeTab(TAB_ROOM, id, name));
         }).catch(err => {
             if (err.response != null) {
                 err.response.json().then( json => {

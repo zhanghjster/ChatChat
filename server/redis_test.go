@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/garyburd/redigo/redis"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/garyburd/redigo/redis"
 )
 
 func TestRDBconnection(t *testing.T) {

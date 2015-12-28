@@ -60,16 +60,15 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 	assert.Nil(t, err, "peer join room err check")
 	assert.True(t, suc, "peer join room suc check")
 
-	exists, err1 := peerInRoom(userID, roomID)
+	exists, err1 := userInRoom(userID, roomID)
 	assert.Nil(t, err1, "peer in room error check")
 	assert.True(t, exists, "peer in room")
-
 
 	suc1, err1 := userLeaveRoom(userID, roomID)
 	assert.Nil(t, err1, "peer leave room err check")
 	assert.True(t, suc1, "peer leave room suc check")
 
-	_, err3 := peerInRoom(userID, roomID)
+	_, err3 := userInRoom(userID, roomID)
 	assert.NotNil(t, err3, "peer in room error check")
 }
 
@@ -89,12 +88,12 @@ func TestMsg(t *testing.T) {
 	id, err := nextMsgID(roomID)
 	assert.Nil(t, err, "next message id")
 	msg := Message{
-		ID: id,
-		RoomID: roomID,
-		Action: TypeTalk,
+		ID:       id,
+		RoomID:   roomID,
+		Action:   TypeTalk,
 		Username: username,
-		Time: time.Now().Format(TIME_LAYOUT),
-		PeerID: peerID,
+		Time:     time.Now().Format(TIME_LAYOUT),
+		PeerID:   peerID,
 	}
 
 	err1 := saveMessage(&msg)

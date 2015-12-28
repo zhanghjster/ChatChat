@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 
 import {
     chatInitialize, tabInitialize, changeTab,
-    createRoom, showCreateRoom, sendMessage
+    createRoom, showCreateRoom, sendMessage, joinRoom
 } from '../actions';
 import history from '../utils/history.js';
 import {ChatLeftSide, RoomList, MessageList, ChatMiddleSide, ChatRightSide} from './index';
@@ -39,7 +39,6 @@ class Chat extends React.Component {
     _tabInitialize() {
         if (!this.props.chat.currentTab.initialized
             && !this.props.chat.currentTab.initializing) {
-            console.log("tab initialize");
             this.props.dispatch(tabInitialize());
         }
     }
@@ -56,6 +55,7 @@ class Chat extends React.Component {
                         initialized={currentTab.initialized}
                         roomList={chatProps.lobbyRoomList}
                         createRoom={(data) => {this.props.dispatch(createRoom(data))}}
+                        joinRoom={(id, name) => {this.props.dispatch(joinRoom(id,name))}}
                        />
                 );
                 break;
@@ -74,7 +74,7 @@ class Chat extends React.Component {
                 currentTab={this.props.chat.currentTab}
                     changeTab={(type, id, name) => {this.props.dispatch(changeTab(type, id, name))}}/>
                 <ChatMiddleSide list={list}/>
-                <ChatRightSide memberList={chatProps.memberList}/>
+                <ChatRightSide memberList={this.props.chat.memberList}/>
             </div>
         )
     }
