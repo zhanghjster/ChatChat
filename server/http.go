@@ -127,13 +127,13 @@ func createRoomEndPoint(c *gin.Context) {
 	})
 }
 
-func joinRoomEndPoint (c *gin.Context) {
-	var json = &struct{
+func joinRoomEndPoint(c *gin.Context) {
+	var json = &struct {
 		RoomID int `form:"roomID" json:"roomID"`
 	}{}
 
 	if c.BindJSON(json) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"ERR":"NEED_ROOMID"})
+		c.JSON(http.StatusBadRequest, gin.H{"ERR": "NEED_ROOMID"})
 		return
 	}
 
@@ -143,8 +143,8 @@ func joinRoomEndPoint (c *gin.Context) {
 
 	fmt.Println("room id is ", roomID)
 
-	if exists, _:= roomExist(roomID); !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"ERR":"ROOM_UNEXIST"})
+	if exists, _ := roomExist(roomID); !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"ERR": "ROOM_UNEXIST"})
 		return
 	}
 
@@ -152,11 +152,11 @@ func joinRoomEndPoint (c *gin.Context) {
 
 	if peer, ok := peers.get(userID64.(int)); ok {
 		if suc := peer.joinRoom(roomID); !suc {
-			if ok,_ := roomExist(roomID); ok {
+			if ok, _ := roomExist(roomID); ok {
 				// another try
 				peer.joinRoom(roomID)
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"ERR":"ROOM_UNEXIST"})
+				c.JSON(http.StatusBadRequest, gin.H{"ERR": "ROOM_UNEXIST"})
 				return
 			}
 		}
@@ -250,7 +250,7 @@ func chatEndPoint(c *gin.Context) {
 
 	peer := NewPeer(ws, userID, username)
 
-	if err := peer.setStatus(PEER_AVAILABLE); err !=nil {
+	if err := peer.setStatus(PEER_AVAILABLE); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ERROR": "INTERNAL_SERVER_ERROR",
 		})
@@ -259,7 +259,7 @@ func chatEndPoint(c *gin.Context) {
 
 	for _, id := range roomIDs {
 		if suc := peer.joinRoom(id); !suc {
-			if ok,_ := roomExist(id); ok {
+			if ok, _ := roomExist(id); ok {
 				// another try
 				peer.joinRoom(id)
 			}

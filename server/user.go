@@ -1,12 +1,11 @@
 package main
 
 import (
+	"errors"
 	"github.com/garyburd/redigo/redis"
 	"strconv"
 	"time"
-"errors"
 )
-
 
 type User struct {
 	Username         string `redis:"username"`
