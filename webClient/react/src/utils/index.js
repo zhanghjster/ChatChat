@@ -3,7 +3,6 @@
  */
 import roomData from './roomData';
 
-
 let createReducer = (initialState, reducerMap) => {
     return (state = initialState, action) => {
         const reducer = reducerMap[action.type];

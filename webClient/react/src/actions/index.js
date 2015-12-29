@@ -11,7 +11,8 @@ import {
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
     ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL, MEMBER_STATUS_UPDATE,
-    JOIN_ROOM,
+    JOIN_ROOM,  PEER_AVAILIABLE, PEER_UNAVAILABLE, PEER_BUSY,
+    TYPE_TALK, TYPE_STATUS_UPDATE, TYPE_PEER_JOIN, TYPE_PEER_LEAVE
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -20,15 +21,6 @@ var API_BASE = "http://localhost:3001/api/v1";
 var WS_BASE  = "ws://localhost:3001/api/v1/start_chat";
 
 let WS = null;
-
-let TYPE_TALK             = 1;
-let TYPE_STATUS_UPDATE    = 2;
-let TYPE_PEER_JOIN        = 3;
-let TYPE_PEER_LEAVE       = 4;
-
-let PEER_AVAILIABLE       = 'available';
-let PEER_UNAVAILABLE      = 'unavailable';
-let PEER_BUSY             = 'busy';
 
 // login
 export function login(username, password) {
@@ -168,7 +160,6 @@ export function chatInitialize() {
     return (dispatch, getState) => {
         let state = getState();
         let token = state.auth.token;
-
         fetch(API_BASE + "/chat_initialize", {
             method: 'get',
             headers: {
