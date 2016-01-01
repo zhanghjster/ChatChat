@@ -3,7 +3,7 @@
  */
 import {createConstants} from '../utils';
 
-var constantsKeyAsValue = createConstants(
+export default Object.assign({}, createConstants(
     'LOGIN_REQUEST', 'LOGIN_SUCCESS','LOGIN_FAIL','LOGOUT', 'LOGOUT',
     'SIGNUP_REQUEST', 'SIGNUP_FAIL',
     'CHAT_INITIALIZE_FAIL','CHAT_INITIALIZE_SUCCESS',
@@ -15,13 +15,10 @@ var constantsKeyAsValue = createConstants(
     'TAB_LOBBY', 'TAB_ROOM', 'TAB_PEER', 'TAB_CHANGED',
     'CHANGE_TAB',
     'ROOM_CREATED', 'LOBBY_INITIALIZE_SUCCESS', 'ROOM_INITIALIZE_SUCCESS',
-    'MEMBER_STATUS_UPDATE','JOIN_ROOM'
-);
-
-var constantsLiteralValue = {
+    'MEMBER_STATUS_UPDATE','JOIN_ROOM',
+    'MAX_MSG_ID_UPDATE'
+), {
     "ENTER_KEY_CODE": 13,
     "PEER_AVAILIABLE" : "available", "PEER_UNAVAILABLE" : "unavailable", "PEER_BUSY" : "busy",
     "TYPE_TALK": 1, "TYPE_STATUS_UPDATE": 2, "TYPE_PEER_JOIN":3, "TYPE_PEER_LEAVE": 4
-};
-
-export default Object.assign({}, constantsKeyAsValue, constantsLiteralValue)
+});

@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-type CurrentTab struct {
-	Type string `redis:"type"`
-	ID   int    `redis:"id"`
-}
-
 const (
 	TIME_LAYOUT = "2006-01-02 15:04:05"
 )
@@ -24,8 +19,7 @@ const (
 var JWT_SECRET = []byte("JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
 
 type HttpServer struct {
-	port           int
-	sessionManager *SessionManager
+	port int
 }
 
 func NewHTTPServer(port int) *HttpServer {
@@ -51,7 +45,7 @@ func (s *HttpServer) Serve() {
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/start_chat", authCheck(), chatEndPoint)
-		v1.POST("/save_current_tab", authCheck(), saveCurrentTabEndPoint)
+		v1.POST("/save_current_channel", authCheck(), saveCurrentChannelEndPoint)
 		v1.GET("/chat_initialize", authCheck(), chatInitializeEndPoint)
 		v1.GET("/lobby_initialize", authCheck(), lobbyInitializeEndPoin)
 		v1.GET("/room_initialize", authCheck(), roomInitializeEndPoint)
@@ -163,8 +157,9 @@ func joinRoomEndPoint(c *gin.Context) {
 		peer.sayHi(roomID)
 	}
 
+	maxMsgID, _ := maxMsgIDofRoom(roomID)
 	c.JSON(http.StatusOK, gin.H{
-		"ID": roomID,
+		"ID": roomID, "MaxMsgID": maxMsgID,
 	})
 }
 
@@ -233,7 +228,7 @@ func chatEndPoint(c *gin.Context) {
 	roomIDs, err := getUserRoomIDs(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"ERROR": "INTERNAL_SERVER_ERROR",
+			"ERR": "INTERNAL_SERVER_ERROR",
 		})
 		return
 	}
@@ -241,18 +236,23 @@ func chatEndPoint(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"ERROR": "INTERNAL_SERVER_ERROR",
+			"ERR": "INTERNAL_SERVER_ERROR",
 		})
 		return
 	}
 
 	username, _ := getUsername(userID)
 
-	peer := NewPeer(ws, userID, username)
+	peer, err := NewPeer(ws, userID, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ERR": "FAIL_TO_INIT_PEER",
+		})
+	}
 
 	if err := peer.setStatus(PEER_AVAILABLE); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"ERROR": "INTERNAL_SERVER_ERROR",
+			"ERR": "FAIL_TO_SET_PEER_STATUS",
 		})
 		return
 	}
@@ -267,7 +267,7 @@ func chatEndPoint(c *gin.Context) {
 		peer.sayHi(id)
 	}
 
-	go peer.read()
+	go peer.run()
 	peer.readMessage()
 
 	// exit
@@ -278,14 +278,27 @@ func chatInitializeEndPoint(c *gin.Context) {
 	userID64, _ := c.Get("userID")
 	userID := userID64.(int)
 
-	currentTab, err1 := getCurrentTab(userID)
+	currentTab, err1 := getCurrentChannel(userID)
 	if err1 != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ERR": "INTERNAL_SERVER_ERROR",
 		})
 	}
 
-	roomList, err2 := getRoomID2NameMap(userID)
+	rooms, err2 := getRoomsRawData(userID)
+
+	roomList := make([]interface{}, len(rooms))
+	for i, r := range rooms {
+		lastReadMsgID, _ := getLastReadMsgID(userID, r.ID)
+		maxMsgID, _ := maxMsgIDofRoom(r.ID)
+		roomList[i] = struct {
+			ID            int
+			Name          string
+			LastReadMsgID int64
+			MaxMsgID      int64
+		}{r.ID, r.Name, lastReadMsgID, maxMsgID}
+	}
+
 	if err2 != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ERR": "INTERNAL_SERVER_ERROR",
@@ -344,7 +357,7 @@ func lobbyInitializeEndPoin(c *gin.Context) {
 func roomInitializeEndPoint(c *gin.Context) {
 	roomID, _ := strconv.Atoi(c.Query("roomID"))
 
-	maxMsgID, err := getMaxMessageID(roomID)
+	maxMsgID, err := maxMsgIDofRoom(roomID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "MAX_MSG_ID_NULL"})
 		return
@@ -386,7 +399,7 @@ func roomInitializeEndPoint(c *gin.Context) {
 	})
 }
 
-func saveCurrentTabEndPoint(c *gin.Context) {
+func saveCurrentChannelEndPoint(c *gin.Context) {
 	var json = &struct {
 		ID   int    `json:"ID"`
 		Type string `json:"Type"`
@@ -400,16 +413,23 @@ func saveCurrentTabEndPoint(c *gin.Context) {
 	userID64, _ := c.Get("userID")
 	userID := userID64.(int)
 
-	currentTab := CurrentTab{
-		Type: json.Type, ID: json.ID,
+	cc := &CurrentChannel{
+		Type: json.Type,
+		ID:   json.ID,
 	}
-	_, err := saveCurrentTab(userID, currentTab)
 
-	if err != nil {
+	if peer, ok := peers.get(userID); ok {
+		maxMsgId, _ := maxMsgIDofRoom(json.ID)
+		cc.LastMsgID = maxMsgId
+		peer.ccUpdate(cc)
+	}
+
+	if _, err := saveCurrentChannel(userID, cc); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ERR": "INTERNAL_SERVER_ERROR",
 		})
 	} else {
+
 		c.JSON(http.StatusOK, gin.H{"SUC": "OK"})
 	}
 }
@@ -455,42 +475,4 @@ func encryp(s string) string {
 	io.WriteString(h, smd5)
 	io.WriteString(h, string(JWT_SECRET))
 	return fmt.Sprintf("%x", h.Sum(nil))
-}
-
-func getCurrentTab(userID int) (*CurrentTab, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	currentTab := &CurrentTab{}
-
-	_, err := db.HGETALL(genRedisKey(CURRENT_TAB_PRE, strconv.Itoa(userID)), currentTab)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return currentTab, nil
-}
-
-func saveCurrentTab(userID int, currentTab CurrentTab) (bool, error) {
-	db := rdbPool.Get()
-	defer db.Close()
-
-	key := genRedisKey(CURRENT_TAB_PRE, strconv.Itoa(userID))
-	_, err := db.DEL(key)
-
-	if err != nil {
-		return false, err
-	}
-
-	err1 := db.HMSET(key,
-		"type", currentTab.Type,
-		"id", currentTab.ID,
-	)
-
-	if err1 != nil {
-		return false, err1
-	}
-
-	return true, nil
 }

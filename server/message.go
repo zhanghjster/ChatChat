@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/garyburd/redigo/redis"
 	"strconv"
 )
 
@@ -29,7 +28,7 @@ func nextMsgID(roomID int) (int64, error) {
 	return db.INCRBY(genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID)), 1)
 }
 
-func saveMessage(msg *Message) error {
+func logMessage(msg *Message) error {
 	db := rdbPool.Get()
 	defer db.Close()
 
@@ -75,13 +74,19 @@ func getMessages(roomID int, lastID int64, limit int64) ([]Message, error) {
 	return messages, nil
 }
 
-func getMaxMessageID(roomID int) (int64, error) {
+func maxMsgIDofRoom(roomID int) (int64, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	key := genRedisKey(ROOM_NEXT_MSG_ID_PRE, strconv.Itoa(roomID))
-	if exist, _ := db.EXISTS(key); exist {
-		return redis.Int64(db.GET(key))
+	key := genRedisKey(ROOM_MSG_CACHE_PRE, strconv.Itoa(roomID))
+	var res []string
+	err := db.ZREVRANGEBYSCORE(&res, key, "+inf", 0, "withscores", "limit", 0, 1)
+	if err != nil {
+		return 0, err
 	}
-	return 0, nil
+	id, err := strconv.ParseInt(res[1], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

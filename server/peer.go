@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/go/src/sync/atomic"
 	"github.com/gorilla/websocket"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -17,16 +17,19 @@ const (
 
 type Peer struct {
 	ID int
-	// Chan for send message
-	sendChan chan []byte
 
 	rooms map[int]*Room
 	ws    *websocket.Conn
 
 	exitChan     chan int
 	roomExitChan chan *Room
-	username     string
-	Status       string
+	sendChan     chan *Message
+	ccUpdateChan chan *CurrentChannel
+
+	username string
+	Status   string
+
+	cc *CurrentChannel
 }
 
 type Peers struct {
@@ -52,32 +55,39 @@ var peers = &Peers{
 	peers: make(map[int]*Peer),
 }
 
-func NewPeer(ws *websocket.Conn, id int, username string) *Peer {
+func NewPeer(ws *websocket.Conn, id int, username string) (*Peer, error) {
 	peer := &Peer{
-		sendChan: make(chan []byte),
-		ws:       ws,
-		ID:       id,
-		rooms:    make(map[int]*Room),
+		ws:    ws,
+		ID:    id,
+		rooms: make(map[int]*Room),
 
+		sendChan:     make(chan *Message, 10),
 		exitChan:     make(chan int),
 		roomExitChan: make(chan *Room),
-		username:     username,
+		ccUpdateChan: make(chan *CurrentChannel),
+
+		username: username,
 	}
+
+	// get current channel
+	cc, err := getCurrentChannel(id)
+	if err != nil {
+		return nil, err
+	}
+	peer.cc = cc
 
 	peers.set(peer)
 
-	return peer
-}
-
-func (p *Peer) write(messageType int, payload []byte) error {
-	return p.ws.WriteMessage(messageType, payload)
+	return peer, nil
 }
 
 // read the message other members talk
-func (p *Peer) read() {
-	ticker := time.NewTicker(5 * time.Second)
+func (p *Peer) run() {
+	pingTicker := time.NewTicker(5 * time.Second)
+	updateTicker := time.NewTicker(1 * time.Second)
 	defer func() {
-		ticker.Stop()
+		pingTicker.Stop()
+		updateTicker.Stop()
 		p.ws.Close()
 	}()
 
@@ -85,23 +95,42 @@ func (p *Peer) read() {
 		select {
 		case message, ok := <-p.sendChan:
 			if !ok {
-				p.write(websocket.CloseMessage, []byte{})
-				return
+				p.ws.WriteMessage(websocket.CloseMessage, []byte{})
+				goto exit
 			}
+
 			// send the message
-			if err := p.write(websocket.TextMessage, message); err != nil {
-				return
+			if err := p.ws.WriteJSON(message); err != nil {
+				goto exit
+			}
+
+			if p.cc.Type != TAB_LOBBY && p.cc.ID == message.RoomID && message.Action == TypeTalk {
+				p.cc.LastMsgID = message.ID
+				p.cc.updateFlag = 1
 			}
 			continue
 		case room := <-p.roomExitChan:
 			delete(p.rooms, room.ID)
-		case <-ticker.C:
-			if err := p.write(websocket.PingMessage, []byte{}); err != nil {
+		case cc, _ := <-p.ccUpdateChan:
+			if p.cc.updateFlag == 1 {
+				go p.logLastReadMsgID(p.ID, p.cc.ID, p.cc.LastMsgID)
+			}
+
+			p.cc = cc
+			p.cc.updateFlag = 1
+			continue
+		case <-pingTicker.C:
+			if err := p.ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				close(p.exitChan)
 			}
 			continue
+		case <-updateTicker.C:
+			if atomic.CompareAndSwapInt32(&p.cc.updateFlag, 1, 0) {
+				go p.logLastReadMsgID(p.ID, p.cc.ID, p.cc.LastMsgID)
+			}
+			continue
+
 		case <-p.exitChan:
-			fmt.Println("go to exit")
 			goto exit
 		}
 	}
@@ -109,12 +138,36 @@ func (p *Peer) read() {
 exit:
 	for _, room := range p.rooms {
 		p.sayBye(room.ID)
-		select {
-		case room.unregisterChan <- p:
-		case <-room.exitChan:
-		}
-
+		room.peerLeave(p)
 	}
+}
+
+func (p *Peer) send(message *Message) {
+	select {
+	case p.sendChan <- message:
+	case <-p.exitChan:
+	}
+}
+
+func (p *Peer) roomExit(room *Room) {
+	select {
+	case p.roomExitChan <- room:
+	case <-p.exitChan:
+	}
+}
+
+func (p *Peer) ccUpdate(cc *CurrentChannel) {
+	select {
+	case p.ccUpdateChan <- cc:
+	case <-p.exitChan:
+	}
+}
+
+func (p *Peer) logLastReadMsgID(userID, roomID int, msgID int64) {
+	db := rdbPool.Get()
+	defer db.Close()
+	logger.debug("save message ", msgID, " to ", roomID)
+	db.HSET(genRedisKey(LAST_READ_MSG, strconv.Itoa(roomID)), userID, msgID)
 }
 
 // read message from conn and talk
@@ -133,6 +186,73 @@ func (p *Peer) readMessage() {
 
 		p.processMessage(message)
 	}
+}
+
+func (p *Peer) processMessage(message *Message) error {
+
+	logger.debug(p.ID, " send ", message.Content, " to room ", message.RoomID)
+
+	room, ok := p.rooms[message.RoomID]
+	if !ok {
+		return errors.New("NO ROON")
+	}
+
+	message.PeerID = p.ID
+
+	switch int(message.Action) {
+	case TypeTalk:
+		if len(message.Content) == 0 {
+			return nil
+		}
+
+		nextMsgID, err := room.nextMsgID()
+		if err != nil {
+			return err
+		}
+
+		message.ID = nextMsgID
+		message.Username = p.username
+		message.Time = time.Now().Format(TIME_LAYOUT)
+
+		if err := logMessage(message); err != nil {
+			return err
+		}
+	case TypeStatusUpdate:
+		message.Content = p.Status
+	case TypePeerJoin, TypePeerLeave:
+		message.Username = p.username
+		message.Time = time.Now().Format(TIME_LAYOUT)
+	}
+
+	room.broadcase(message)
+
+	return nil
+}
+
+func (p *Peer) joinRoom(roomID int) (suc bool) {
+	var room *Room
+	var exist bool
+
+	rooms.Lock()
+
+	if room, exist = rooms.get(roomID); !exist {
+		room = NewRoom(roomID)
+	}
+
+	rooms.Unlock()
+
+	return room.peerJoin(p)
+}
+
+func (p *Peer) leaveRoom(roomID int) {
+	room, _ := p.rooms[roomID]
+	room.Lock()
+	delete(room.peers, p)
+	room.Unlock()
+
+	delete(p.rooms, roomID)
+
+	room.peerLeave(p)
 }
 
 func (p *Peer) sayHi(roomID int) {
@@ -156,86 +276,4 @@ func (p *Peer) sayBye(roomID int) {
 func (p *Peer) setStatus(status string) error {
 	p.Status = status
 	return saveUserStatus(p.ID, status)
-}
-
-func (p *Peer) processMessage(message *Message) error {
-	fmt.Println(p.ID, " send message ", message.Content, "to ", message.RoomID)
-
-	room, ok := p.rooms[message.RoomID]
-	if !ok {
-		return errors.New("NO ROON")
-	}
-
-	message.PeerID = p.ID
-
-	switch int(message.Action) {
-	case TypeTalk:
-		if len(message.Content) == 0 {
-			return nil
-		}
-
-		nextMsgID, err := nextMsgID(message.RoomID)
-		if err != nil {
-			return err
-		}
-
-		message.ID = nextMsgID
-		message.Username = p.username
-		message.Time = time.Now().Format(TIME_LAYOUT)
-
-		if err := saveMessage(message); err != nil {
-			return err
-		}
-	case TypeStatusUpdate:
-		message.Content = p.Status
-	case TypePeerJoin, TypePeerLeave:
-		message.Username = p.username
-		message.Time = time.Now().Format(TIME_LAYOUT)
-	}
-
-	// sent message to peers
-	msg, err := json.Marshal(message)
-	if err != nil {
-		return err
-	}
-	select {
-	case room.broadcastChan <- msg:
-	case <-room.exitChan:
-	}
-	return nil
-}
-
-func (p *Peer) joinRoom(roomID int) (suc bool) {
-	var room *Room
-	var exist bool
-
-	rooms.Lock()
-
-	if room, exist = rooms.get(roomID); !exist {
-		room = NewRoom(roomID)
-	}
-
-	rooms.Unlock()
-
-	select {
-	case room.registerChan <- p:
-		p.rooms[roomID] = room
-		return true
-	case <-room.exitChan:
-		return false
-	}
-}
-
-func (p *Peer) leaveRoom(roomID int) {
-	room, _ := p.rooms[roomID]
-	room.Lock()
-	delete(room.peers, p)
-	room.Unlock()
-
-	delete(p.rooms, roomID)
-
-	select {
-	case room.unregisterChan <- p:
-	case <-room.exitChan:
-	}
 }

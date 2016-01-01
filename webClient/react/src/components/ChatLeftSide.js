@@ -18,10 +18,18 @@ export default  class ChatLeftSide extends React.Component {
         let roomList   = this.props.roomList;
 
         let roomItems = roomList.map((room) => {
+            let badge = null;
+            if (room.MaxMsgID > room.LastReadMsgID && currentTab.ID != room.ID) {
+                let msgCount = room.MaxMsgID - room.LastReadMsgID;
+                badge = (
+                    <span className="badge bg-important pull-right">{msgCount}</span>
+                );
+            }
+
             return (
                 <li className={ room.ID === currentTab.ID ? "active" : null }>
                     <a href="#" onClick={() => {this.props.changeTab(TAB_ROOM, room.ID, room.Name)}} >
-                        <span>{room.Name}</span>
+                        <span>{room.Name}</span>{badge}
                     </a>
                 </li>
             )
