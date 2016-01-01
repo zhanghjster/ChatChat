@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/go/src/sync/atomic"
+	"sync/atomic"
 	"github.com/gorilla/websocket"
 	"strconv"
 	"sync"
