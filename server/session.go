@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"log"
 	"net/http"
 	"net/url"
 )
