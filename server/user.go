@@ -1,12 +1,24 @@
 package main
 
 import (
+	"errors"
 	"github.com/garyburd/redigo/redis"
 	"strconv"
 	"time"
-"errors"
 )
 
+const (
+	TAB_LOBBY = "TAB_LOBBY"
+	TAB_ROOM  = "TAB_ROOM"
+	TAB_PEER  = "TAB_PEER"
+)
+
+type CurrentChannel struct {
+	Type       string `redis:"type"`
+	ID         int    `redis:"id"`
+	LastMsgID  int64
+	updateFlag int32
+}
 
 type User struct {
 	Username         string `redis:"username"`
@@ -121,6 +133,25 @@ func getUserPassword(username string) string {
 	return password
 }
 
+func userInRoom(userID, roomID int) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	if exists, _ := roomExist(roomID); !exists {
+		return false, errors.New("room not exists")
+	}
+
+	if _, err := db.ZRANK(genRedisKey(PEER_ROOM_PRE, strconv.Itoa(userID)), roomID); err != nil {
+		return false, err
+	}
+
+	if _, err := db.ZRANK(genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), userID); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func userJoinRoom(userID, roomID int) (bool, error) {
 	db := rdbPool.Get()
 	defer db.Close()
@@ -183,4 +214,67 @@ func userLeaveRoom(userID, roomID int) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func getUserIdOfRoom(roomID int) ([]int, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	var peerID []int
+	if err := db.ZRANGE(&peerID, genRedisKey(ROOM_PEER_PRE, strconv.Itoa(roomID)), 0, -1); err != nil {
+		return nil, err
+	}
+
+	return peerID, nil
+}
+
+func getCurrentChannel(userID int) (*CurrentChannel, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	currentChannel := &CurrentChannel{}
+
+	_, err := db.HGETALL(genRedisKey(CURRENT_TAB_PRE, strconv.Itoa(userID)), currentChannel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return currentChannel, nil
+}
+
+func saveCurrentChannel(userID int, currentChannel *CurrentChannel) (bool, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	key := genRedisKey(CURRENT_TAB_PRE, strconv.Itoa(userID))
+	_, err := db.DEL(key)
+
+	if err != nil {
+		return false, err
+	}
+
+	err1 := db.HMSET(key,
+		"type", currentChannel.Type,
+		"id", currentChannel.ID,
+	)
+
+	if err1 != nil {
+		return false, err1
+	}
+
+	return true, nil
+}
+
+func getLastReadMsgID(userID, roomID int) (int64, error) {
+	db := rdbPool.Get()
+	defer db.Close()
+
+	id, _ := db.HGET(genRedisKey(LAST_READ_MSG, strconv.Itoa(roomID)), userID)
+
+	if id == nil {
+		return 0, nil
+	}
+
+	return redis.Int64(id, nil)
 }

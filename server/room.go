@@ -1,16 +1,10 @@
 package main
 
 import (
-	"github.com/garyburd/redigo/redis"
+	"errors"
 	"strconv"
-	"time"
 	"sync"
-)
-
-const (
-	TAB_LOBBY = "TAB_LOBBY"
-	TAB_ROOM  = "TAB_ROOM"
-	TAB_PEER  = "TAB_PEER"
+	"time"
 )
 
 type RoomData struct {
@@ -32,11 +26,15 @@ type Room struct {
 	hash  string
 	peers map[*Peer]bool
 
-	broadcastChan chan []byte
-	registerChan  chan *Peer
+	broadcastChan  chan *Message
+	registerChan   chan *Peer
 	unregisterChan chan *Peer
-	exitChan		chan int
-	time int
+	idChan         chan int64
+
+	exitChan chan int
+
+	maxID int64
+	time  int
 }
 
 type Rooms struct {
@@ -69,11 +67,13 @@ func NewRoom(roomID int) *Room {
 	room := &Room{
 		ID: roomID,
 
-		broadcastChan:  make(chan []byte),
-		registerChan: make(chan *Peer),
-		peers: make(map[*Peer]bool),
+		broadcastChan:  make(chan *Message, 100),
+		registerChan:   make(chan *Peer),
+		unregisterChan: make(chan *Peer),
+		peers:          make(map[*Peer]bool),
 
 		exitChan: make(chan int),
+		idChan:   make(chan int64),
 
 		time: int(time.Now().Unix()),
 	}
@@ -84,52 +84,98 @@ func NewRoom(roomID int) *Room {
 	return room
 }
 
-func (r *Room) addPeer(peer *Peer)  {
+func (r *Room) addPeer(peer *Peer) {
 	r.Lock()
 	r.peers[peer] = true
 	r.Unlock()
 }
 
 func (r *Room) run() {
-
+	go r.idPump()
 	for {
 		select {
-		case peer := <- r.registerChan:
-			r.peers[peer] = true;
+		case peer := <-r.registerChan:
+			r.peers[peer] = true
+			logger.debug(peer.ID, " join room", r.ID)
 			continue
 
-		case peer := <- r.unregisterChan:
+		case peer := <-r.unregisterChan:
 			delete(r.peers, peer)
 			continue
 
 		case message := <-r.broadcastChan:
 			for peer := range r.peers {
-				select{
-				case peer.sendChan <- message:
-				case <- peer.exitChan:
-				}
+				peer.send(message)
 			}
+
 			continue
-		case <- r.exitChan:
+		case <-r.exitChan:
 			rooms.del(r.ID)
 			for peer := range r.peers {
-				select {
-				case peer.roomExitChan <- r:
-				case <- peer.exitChan:
-				}
+				peer.roomExit(r)
 			}
 			goto exit
 		}
 	}
 
-	exit:
+exit:
 }
 
-func (r *Room) broadcastPacket(message []byte) {
-	r.broadcastChan <- message
+func (r *Room) broadcase(message *Message) {
+	select {
+	case r.broadcastChan <- message:
+	case <-r.exitChan:
+	}
 }
 
-func getRoomID2NameMap(userID int) (*[]interface{}, error) {
+func (r *Room) peerJoin(peer *Peer) bool {
+	select {
+	case r.registerChan <- peer:
+		peer.rooms[r.ID] = r
+		return true
+	case <-r.exitChan:
+		return false
+	}
+}
+
+func (r *Room) peerLeave(peer *Peer) bool {
+	select {
+	case r.unregisterChan <- peer:
+		peer.rooms[r.ID] = r
+		return true
+	case <-r.exitChan:
+		return false
+	}
+}
+
+func (r *Room) idPump() {
+	db := rdbPool.Get()
+	maxMsgID, err := maxMsgIDofRoom(r.ID)
+	db.Close()
+	if err != nil {
+		panic(errors.New("fail to get max message id"))
+	}
+	r.maxID = maxMsgID
+	for {
+		select {
+		case r.idChan <- r.maxID + 1:
+			r.maxID++
+		case <-r.exitChan:
+			break
+		}
+	}
+}
+
+func (r *Room) nextMsgID() (int64, error) {
+	select {
+	case id := <-r.idChan:
+		return id, nil
+	case <-r.exitChan:
+		return 0, errors.New("ROOM exit")
+	}
+}
+
+func getRoomsRawData(userID int) ([]*RoomData, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 
@@ -139,17 +185,15 @@ func getRoomID2NameMap(userID int) (*[]interface{}, error) {
 		return nil, err
 	}
 
-	var ID2Name = make([]interface{}, len(roomID))
+	var rawData = make([]*RoomData, len(roomID))
 	// get room name
 	for i, id := range roomID {
-		roomName, _ := redis.String(db.HGET(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(id)), "name"))
-		ID2Name[i] = struct {
-			ID   int
-			Name string
-		}{ID: id, Name: roomName}
+		data := &RoomData{}
+		db.HGETALL(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(id)), data)
+		rawData[i] = data
 	}
 
-	return &ID2Name, nil
+	return rawData, nil
 }
 
 func getUserRoomIDs(userID int) ([]int, error) {
@@ -223,12 +267,8 @@ func getRoomRaw(roomID int) (*RoomData, error) {
 	return roomRaw, nil
 }
 
-
-
 func roomExist(roomID int) (bool, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 	return db.EXISTS(genRedisKey(ROOM_CACHE_PRE, strconv.Itoa(roomID)))
 }
-
-

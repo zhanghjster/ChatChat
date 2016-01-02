@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -44,7 +43,6 @@ func (sm *SessionManager) DeleteSession(session *Session) {
 }
 
 func (sm *SessionManager) InitSession(sid, username string) *Session {
-	log.Println("username " + username)
 	return &Session{
 		sid:      sid,
 		username: username,
@@ -53,10 +51,10 @@ func (sm *SessionManager) InitSession(sid, username string) *Session {
 
 func (sm *SessionManager) StartSession(w http.ResponseWriter, username string) *Session {
 	sid := sm.NewSessionID()
-	session := sessionManager.InitSession(sid, username)
+	session := sm.InitSession(sid, username)
 
 	cookie := http.Cookie{
-		Name:     sessionManager.sessionName,
+		Name:     sm.sessionName,
 		Value:    url.QueryEscape(sid + "-" + username),
 		Path:     "/",
 		HttpOnly: true,

@@ -11,7 +11,8 @@ import {
     MEMBER_ACTIVE, MEMBER_UNACTIVE, MEMBER_JOIN, MEMBER_LEAVE,
     TAB_LOBBY, TAB_ROOM, TAB_PEER,
     CHANGE_TAB, LOGOUT, ROOM_CREATED,
-    LOBBY_INITIALIZE_SUCCESS, ROOM_INITIALIZE_SUCCESS, MEMBER_STATUS_UPDATE
+    LOBBY_INITIALIZE_SUCCESS, ROOM_INITIALIZE_SUCCESS, MEMBER_STATUS_UPDATE,
+    MAX_MSG_ID_UPDATE
 } from "../constants";
 
 var tabInitialState = {
@@ -85,20 +86,49 @@ var roomList = createReducer([], {
             ...state.slice(payload.index + 1)
         ];
     },
-    [JOIN_ROOM]: (state, payload) => {
-        return [
-            payload.room,
-            ...state,
-        ];
-    },
     [ROOM_CREATED]: (state, payload) => {
         return [
             {
                 ID: payload.ID,
-                Name: payload.Name
+                Name: payload.Name,
+                MaxMsgID: 0,
+                LastReadMsgID: 0,
             },
             ...state,
         ];
+    },
+    [JOIN_ROOM]: (state, payload) => {
+        return [
+            {
+                ID: payload.ID,
+                Name: payload.Name,
+                MaxMsgID: payload.MaxMsgID,
+                LastReadMsgID: payload.MaxMsgID,
+            },
+            ...state,
+        ];
+    },
+    [NEW_MESSAGE]: (state, payload) => {
+        return state.map((r) => {
+            if (r.ID == payload.ID) {
+                let s = {MaxMsgID: payload.MaxMsgID };
+                if (r.ID == payload.TabID) {
+                    s["LastReadMsgID"] = payload.MaxMsgID;
+                }
+                return Object.assign({}, r, s);
+            }
+            return r;
+        });
+    },
+    [TAB_CHANGED]: (state, payload) => {
+        return state.map((r) => {
+            if (r.ID == payload.ID) {
+                return Object.assign({}, r, {
+                    LastReadMsgID: r.MaxMsgID,
+                });
+            }
+            return r;
+        })
     }
 });
 
@@ -108,9 +138,13 @@ var messageList = createReducer([], {
     },
 
     [NEW_MESSAGE]: (state, payload) => {
-        return [
-            ...state, payload.message
-        ]
+        if (payload.addToList != 1) {
+            return state;
+        } else {
+            return [
+                ...state, payload.message
+            ]
+        }
     },
     [TAB_CHANGING]: (state, payload) => {
         return [];
@@ -151,8 +185,10 @@ var memberList = createReducer([], {
     },
     [MEMBER_STATUS_UPDATE]: (state, payload) => {
         let members = state.map((m) => {
-            if (m.userID == payload.userID) {
-                m.status = payload.status;
+            if (m.id == payload.id) {
+                return Object.assign({}, m, {
+                    status: payload.status,
+                });
             }
             return m;
         });
