@@ -7,10 +7,11 @@ import (
 
 func TestGetMaxMessageID(t *testing.T) {
 
-	roomID := 76
+	roomID := 7600000000
 
 	_, err := maxMsgIDofRoom(roomID)
 
 	assert.Nil(t, err, "get max message id ")
+
 
 }

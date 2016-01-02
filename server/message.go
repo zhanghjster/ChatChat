@@ -84,6 +84,10 @@ func maxMsgIDofRoom(roomID int) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	if len(res) == 0 {
+		return 0, nil
+	}
 	id, err := strconv.ParseInt(res[1], 10, 64)
 	if err != nil {
 		return 0, err
