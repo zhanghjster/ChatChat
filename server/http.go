@@ -55,13 +55,13 @@ func (s *HttpServer) Serve() {
 		v1.POST("/join_room", authCheck(), joinRoomEndPoint)
 	}
 
-	r.LoadHTMLGlob("../webClient/templates/*")
+	r.LoadHTMLGlob("../web/templates/*")
 
 	staticMap := []string{
 		"css", "img", "js", "assets",
 	}
 	for _, path := range staticMap {
-		r.Static(path, "../webClient/static/"+path)
+		r.Static(path, "../web/static/"+path)
 	}
 
 	r.Run(":3001")
