@@ -16,7 +16,7 @@ install:
   - go get github.com/gin-gonic/gin
   - go get github.com/BurntSushi/toml
   - go get github.com/stretchr/testify/assert
-  - cd webClient/react && npm install
+  - cd web/react && npm install
   #- git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
 
 script:
