@@ -21,6 +21,6 @@ install:
 
 script:
   - cd $TRAVIS_BUILD_DIR/server && go test
-  - cd $TRAVIS_BUILD_DIR/webClient/react && npm build
+  - cd $TRAVIS_BUILD_DIR/web/react && npm build
 
 
