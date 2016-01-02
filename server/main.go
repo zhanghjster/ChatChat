@@ -11,18 +11,17 @@ func main() {
 }
 
 var (
-	configure      *Configure
-	rdbPool        *RDBpool
-	sessionManager *SessionManager
-	upgrader       websocket.Upgrader
+	configure *Configure
+	rdbPool   *RDBpool
+	upgrader  websocket.Upgrader
+	logger    *Log
 )
 
 func init() {
 
 	configure = LoadConfigure()
-
+	logger = NewLogger()
 	rdbPool = NewRDBpool(configure.Redis.Host)
-	sessionManager, _ = NewSessionManager("chatchat", 100000)
 
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  4096,

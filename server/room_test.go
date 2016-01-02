@@ -8,21 +8,21 @@ import (
 
 func TestCurrentTab(t *testing.T) {
 
-	currentTab := CurrentTab{
+	cc := CurrentChannel{
 		Type: TAB_LOBBY,
 	}
 
 	userID := 1
 
-	_, err := saveCurrentTab(userID, currentTab)
+	_, err := saveCurrentChannel(userID, &cc)
 	assert.Nil(t, err, "save current tab err check")
 
-	ctab, err1 := getCurrentTab(userID)
+	ctab, err1 := getCurrentChannel(userID)
 
 	assert.Nil(t, err1, "get current tab err check")
 
-	assert.Equal(t, ctab.Type, currentTab.Type)
-	assert.Equal(t, ctab.ID, currentTab.ID)
+	assert.Equal(t, ctab.Type, cc.Type)
+	assert.Equal(t, ctab.ID, cc.ID)
 
 }
 
@@ -75,7 +75,7 @@ func TestPeerJoinLeaveRoom(t *testing.T) {
 func TestGetRoomID2NameMap(t *testing.T) {
 	userID := 1
 
-	_, err := getRoomID2NameMap(userID)
+	_, err := getRoomsRawData(userID)
 	assert.Nil(t, err, "err?")
 }
 
@@ -96,10 +96,10 @@ func TestMsg(t *testing.T) {
 		PeerID:   peerID,
 	}
 
-	err1 := saveMessage(&msg)
+	err1 := logMessage(&msg)
 	assert.Nil(t, err1, "save messsage err")
 
-	maxMsgID, err := getMaxMessageID(roomID)
+	maxMsgID, err := maxMsgIDofRoom(roomID)
 
 	msgs, err2 := getMessages(roomID, maxMsgID, 1)
 	assert.EqualValues(t, msg, msgs[0])

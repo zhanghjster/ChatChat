@@ -7,10 +7,26 @@ var webpack = require('webpack'),
     distPath= path.join(__dirname , "../static/js/"),
     HtmlWebpackPlugin = require('html-webpack-plugin');
 
-var envPlugin = new webpack.DefinePlugin({
-    __DEV__: JSON.stringify(JSON.parse(process.env.BUILD_DEV || 'true')),
-});
-var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
+var isDev = JSON.parse(process.env.BUILD_DEV || 'false');
+
+var Plugins = [
+    new webpack.DefinePlugin({
+        __DEV__: JSON.stringify(isDev)
+    }),
+    new webpack.optimize.CommonsChunkPlugin((isDev) ? 'common.js' : 'common.min.js'),
+    new webpack.ProvidePlugin({
+        'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+    })
+];
+
+if (!isDev) {
+    Plugins.push(
+        new webpack.optimize.UglifyJsPlugin({
+            compressor: { warnings: false }
+        }),
+        new webpack.optimize.DedupePlugin()
+    );
+}
 
 module.exports = {
     context: srcPath,
@@ -20,23 +36,17 @@ module.exports = {
     },
     output: {
         path: distPath,
-        filename: 'webClient.js',
+        filename: (isDev) ? "webClient.js" : "webClient.min.js",
         publicPath: '/js/'
     },
     resolve:{
         root: srcPath,
-        modulesDirectories: ["node_modules", "src"],
+        modulesDirectories: ["node_modules", "src"]
     },
     module: {
         loaders: [
             { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader"}
         ]
     },
-    plugins: [
-        envPlugin,
-        commonsPlugin,
-        new webpack.ProvidePlugin({
-            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-        })
-    ]
+    plugins: Plugins
 }

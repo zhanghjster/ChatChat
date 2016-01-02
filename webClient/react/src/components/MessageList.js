@@ -4,8 +4,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
-
-var ENTER_KEY_CODE = 13;
+import {
+   TYPE_PEER_JOIN, TYPE_PEER_LEAVE, ENTER_KEY_CODE,
+} from "../constants";
 
 export default class MessageList extends React.Component {
 
@@ -42,9 +43,9 @@ export default class MessageList extends React.Component {
             let firstPartClass = "first-part"
             let firstPart = "", secondPart = "";
 
-            if (message.a == 3) {
+            if (message.a == TYPE_PEER_JOIN) {
                 secondPart = message.u + " joined room ";
-            } else if (message.a == 4) {
+            } else if (message.a == TYPE_PEER_LEAVE) {
                 secondPart = message.u + " left room ";
             } else {
                 firstPart = message.u;

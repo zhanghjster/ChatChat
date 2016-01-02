@@ -5,6 +5,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
+import {PEER_AVAILIABLE, PEER_UNAVAILABLE, PEER_BUSY} from "../constants";
 
 export default class ChatRightSide extends React.Component {
 
@@ -14,13 +15,13 @@ export default class ChatRightSide extends React.Component {
         let memberItems = memberList.map((member) => {
             let statusClass = null;
             switch (member.status) {
-                case "available":
+                case PEER_AVAILIABLE:
                     statusClass = "fa fa-circle text-success";
                     break;
-                case "unavailable":
+                case PEER_UNAVAILABLE:
                     statusClass = "fa fa-circle text-muted";
                     break;
-                case "busy":
+                case PEER_BUSY:
                     statusClass = "fa fa-circle text-danger";
                     break;
             }

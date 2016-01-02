@@ -11,7 +11,9 @@ import {
     TAB_LOBBY, TAB_ROOM, TAB_PEER, TAB_CHANGED,
     CHANGE_TAB, LOBBY_INITIALIZE_SUCCESS, ROOM_CREATED,
     ROOM_INITIALIZE_SUCCESS, NEW_MESSAGE, CHAT_INITIALIZE_FAIL, MEMBER_STATUS_UPDATE,
-    JOIN_ROOM,
+    JOIN_ROOM,  PEER_AVAILIABLE, PEER_UNAVAILABLE, PEER_BUSY,
+    TYPE_TALK, TYPE_STATUS_UPDATE, TYPE_PEER_JOIN, TYPE_PEER_LEAVE,
+    MAX_MSG_ID_UPDATE
 } from '../constants';
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
@@ -20,15 +22,6 @@ var API_BASE = "http://localhost:3001/api/v1";
 var WS_BASE  = "ws://localhost:3001/api/v1/start_chat";
 
 let WS = null;
-
-let TYPE_TALK             = 1;
-let TYPE_STATUS_UPDATE    = 2;
-let TYPE_PEER_JOIN        = 3;
-let TYPE_PEER_LEAVE       = 4;
-
-let PEER_AVAILIABLE       = 'available';
-let PEER_UNAVAILABLE      = 'unavailable';
-let PEER_BUSY             = 'busy';
 
 // login
 export function login(username, password) {
@@ -101,7 +94,7 @@ export function changeTab(newType, newID, name) {
         });
 
         // call api save current tab
-        fetch(API_BASE + "/save_current_tab", {
+        fetch(API_BASE + "/save_current_channel", {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -168,7 +161,6 @@ export function chatInitialize() {
     return (dispatch, getState) => {
         let state = getState();
         let token = state.auth.token;
-
         fetch(API_BASE + "/chat_initialize", {
             method: 'get',
             headers: {
@@ -178,6 +170,7 @@ export function chatInitialize() {
         .then(checkHttpStatus)
         .then(parseJSON)
         .then(response => {
+                console.log(response);
                 let currentTab = response.currentTab;
                 for (var i in response.roomList) {
                     let room = response.roomList[i];
@@ -232,15 +225,16 @@ function processMessage(dispatch, getState, message) {
 }
 
 function messageUpdate(dispatch, tabID, message) {
-
-    if ( tabID == message.r ) {
-        dispatch({
-            type: NEW_MESSAGE,
-            payload: {
-                message: message
-            }
-        });
-    }
+    dispatch({
+        type: NEW_MESSAGE,
+        payload: {
+            message: message,
+            addToList: (tabID == message.r) ? 1 : 0,
+            ID: message.r,
+            MaxMsgID: message.i,
+            TabID: tabID
+        }
+    });
 
     roomData.addMessage(message.r, message);
 }
@@ -460,7 +454,7 @@ export function joinRoom(id, name) {
             dispatch({
                 type: JOIN_ROOM,
                 payload: {
-                    ID: id, Name: name,
+                    ID: id, Name: name, MaxMsgID: response.MaxMsgID
                 }
             });
             dispatch(changeTab(TAB_ROOM, id, name));

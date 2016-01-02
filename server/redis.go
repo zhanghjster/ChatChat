@@ -19,6 +19,7 @@ const (
 	ROOM_ID_INDEX_PRE    = "CCRI"
 	ROOM_NEXT_MSG_ID_PRE = "CCrnmi:"
 	ROOM_MSG_CACHE_PRE   = "CCrmc:"
+	LAST_READ_MSG        = "CClrmi:"
 )
 
 type RDBpool struct {
@@ -107,9 +108,14 @@ func (db *RDB) GET(k string) (interface{}, error) {
 }
 
 // HGET key filed
-func (db *RDB) HGET(k, f string) (interface{}, error) {
-	return db.conn.Do("HGET", k, f)
+func (db *RDB) HGET(args ...interface{}) (interface{}, error) {
+	return db.conn.Do("HGET", args...)
+}
 
+// HSET key filed value
+func (db *RDB) HSET(args ...interface{}) error {
+	_, err := db.conn.Do("HSET", args...)
+	return err
 }
 
 // ZADD key s1 m1 s2 m2 ....
