@@ -270,5 +270,11 @@ func getLastReadMsgID(userID, roomID int) (int64, error) {
 	db := rdbPool.Get()
 	defer db.Close()
 
-	return redis.Int64(db.HGET(genRedisKey(LAST_READ_MSG, strconv.Itoa(roomID)), userID))
+	id, _ := db.HGET(genRedisKey(LAST_READ_MSG, strconv.Itoa(roomID)), userID)
+
+	if id == nil {
+		return 0, nil
+	}
+
+	return redis.Int64(id, nil)
 }
