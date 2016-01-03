@@ -1,3 +1,4 @@
 .idea/*
 server/server
 conf/server.cfg
+build/*
