@@ -1,4 +1,4 @@
-.PHONY: build clean test
+.PHONY: build dev clean test
 
 GOFLAGS ?= $(GOFLAGS:)
 
