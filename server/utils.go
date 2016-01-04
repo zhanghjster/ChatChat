@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+"path/filepath"
+"os"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -42,4 +44,9 @@ func GUID(n int) string {
 	}
 
 	return string(b)
+}
+
+func binDir() string {
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	return dir
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/garyburd/redigo/redis"
 	"time"
+	"github.com/go/src/fmt"
 )
 
 const (
@@ -54,7 +55,7 @@ func NewRDBpool(address string) *RDBpool {
 	conn := pool.Get()
 	defer conn.Close()
 	if conn.Err() != nil {
-		panic("Can not connect to redis")
+		panic(fmt.Sprintf("Can not connect to redis %s", address))
 	}
 
 	return &RDBpool{pool: pool}

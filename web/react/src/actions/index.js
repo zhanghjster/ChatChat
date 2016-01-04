@@ -18,8 +18,8 @@ import {
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
 
-var API_BASE = "http://localhost:3001/api/v1";
-var WS_BASE  = "ws://localhost:3001/api/v1/start_chat";
+var API_BASE = "http://dockerhost:3001/api/v1";
+var WS_BASE  = "ws://dockerhost:3001/api/v1/start_chat";
 
 let WS = null;
 

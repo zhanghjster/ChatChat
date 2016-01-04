@@ -32,6 +32,7 @@ func NewHTTPServer(port int) *HttpServer {
 func (s *HttpServer) Serve() {
 	r := gin.Default()
 
+	wd := binDir()
 	sameHandlerMap := []string{
 		"/", "/login", "/logout", "/signup", "/chat",
 	}
@@ -55,13 +56,13 @@ func (s *HttpServer) Serve() {
 		v1.POST("/join_room", authCheck(), joinRoomEndPoint)
 	}
 
-	r.LoadHTMLGlob("../web/templates/*")
+	r.LoadHTMLGlob(wd + "/../web/templates/*")
 
 	staticMap := []string{
 		"css", "img", "js", "assets",
 	}
 	for _, path := range staticMap {
-		r.Static(path, "../web/static/"+path)
+		r.Static(path, wd + "/../web/static/"+path)
 	}
 
 	r.Run(":3001")
