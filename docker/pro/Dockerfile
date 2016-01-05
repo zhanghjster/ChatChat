@@ -9,6 +9,8 @@ RUN chmod +x /var/www/chatchat/bin/cc && \
 
 ENV PATH /var/www/chatchat/bin:$PATH
 
+ENV GIN_MODE=release
+
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
