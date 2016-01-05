@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/md5"
-    "fmt"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -62,7 +62,7 @@ func (s *HttpServer) Serve() {
 		"css", "img", "js", "assets",
 	}
 	for _, path := range staticMap {
-		r.Static(path, wd + "/../web/static/"+path)
+		r.Static(path, wd+"/../web/static/"+path)
 	}
 
 	r.Run(":3001")
@@ -251,13 +251,6 @@ func chatEndPoint(c *gin.Context) {
 		})
 	}
 
-	if err := peer.setStatus(PEER_AVAILABLE); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"ERR": "FAIL_TO_SET_PEER_STATUS",
-		})
-		return
-	}
-
 	for _, id := range roomIDs {
 		if suc := peer.joinRoom(id); !suc {
 			if ok, _ := roomExist(id); ok {
@@ -270,9 +263,6 @@ func chatEndPoint(c *gin.Context) {
 
 	go peer.run()
 	peer.readMessage()
-
-	// exit
-	peer.setStatus(PEER_UNAVAILABLE)
 }
 
 func chatInitializeEndPoint(c *gin.Context) {
@@ -370,18 +360,18 @@ func roomInitializeEndPoint(c *gin.Context) {
 		return
 	}
 
-	peerID, err := getUserIdOfRoom(roomID)
+	memberID, err := getUserIdOfRoom(roomID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ERR": "NO_PEER_FOUND"})
 		return
 	}
 
-	var peers = make([]interface{}, len(peerID))
+	var members = make([]interface{}, len(memberID))
 
-	for i, id := range peerID {
+	for i, id := range memberID {
 		username, _ := getUsername(id)
-		status, _ := gerUserStatus(id)
-		peers[i] = struct {
+		status, _ := getPeerStatus(id)
+		members[i] = struct {
 			ID       int    `json:"id"`
 			Username string `json:"username"`
 			Status   string `json:"status"`
@@ -392,11 +382,9 @@ func roomInitializeEndPoint(c *gin.Context) {
 		}
 	}
 
-	fmt.Println("peers ", peers)
-
 	c.JSON(http.StatusOK, gin.H{
 		"messageList": messages,
-		"memberList":  peers,
+		"memberList":  members,
 	})
 }
 

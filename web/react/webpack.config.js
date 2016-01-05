@@ -11,7 +11,7 @@ var isDev = JSON.parse(process.env.BUILD_DEV || 'false');
 
 var Plugins = [
     new webpack.DefinePlugin({
-        __DEV__: JSON.stringify(isDev)
+        __DEV__: JSON.stringify(isDev),
     }),
     new webpack.optimize.CommonsChunkPlugin((isDev) ? 'common.js' : 'common.min.js'),
     new webpack.ProvidePlugin({

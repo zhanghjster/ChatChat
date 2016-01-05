@@ -13,5 +13,4 @@ func TestGetMaxMessageID(t *testing.T) {
 
 	assert.Nil(t, err, "get max message id ")
 
-
 }

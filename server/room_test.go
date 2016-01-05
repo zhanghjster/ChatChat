@@ -114,7 +114,7 @@ func TestUserStatus(t *testing.T) {
 	err := saveUserStatus(userID, status)
 	assert.Nil(t, err, "set user status err")
 
-	status1, err1 := gerUserStatus(userID)
+	status1, err1 := getPeerStatus(userID)
 	assert.Nil(t, err1, "get user status err")
 	assert.EqualValues(t, status, status1)
 }
