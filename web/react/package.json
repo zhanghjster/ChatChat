@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build_dev": "BUILD_DEV=true webpack --progress --profile --colors",
-    "build_prod": "BUILD_DEV=false webpack --progress --profile --colors",
+    "build_pro": "BUILD_DEV=false webpack --progress --profile --colors",
     "watch": "BUILD_DEV=true webpack --progress --colors --watch",
     "wtest": "mocha --compilers js:babel/register -w"
   },

@@ -21,7 +21,7 @@ func init() {
 
 	configure = LoadConfigure()
 	logger = NewLogger()
-	rdbPool = NewRDBpool(configure.Redis.Host)
+	rdbPool = NewRDBpool(configure.Redis.Url)
 
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  4096,

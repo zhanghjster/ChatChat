@@ -1,0 +1,15 @@
+cc:
+  image: 'chatchat'
+  container_name: 'cc'
+  ports:
+    - "3001:3001"
+  links:
+    - 'redis:redishost'
+redis:
+  image: 'redis'
+  container_name: 'redis'
+  ports:
+    - "6379:6379"
+  volumes_from:
+    - redisdata
+  command: redis-server --appendonly yes

@@ -87,17 +87,7 @@ func getUsername(userID int) (string, error) {
 	return username, nil
 }
 
-func gerUserStatus(userID int) (string, error) {
-	db := rdbPool.Get()
-	defer db.Close()
 
-	status, err := redis.String(db.HGET(genRedisKey(USER_CACHE_PRE, strconv.Itoa(userID)), "status"))
-	if err != nil {
-		return "", err
-	}
-
-	return status, nil
-}
 
 func saveUserStatus(userID int, status string) error {
 	db := rdbPool.Get()
