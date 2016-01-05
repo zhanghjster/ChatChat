@@ -105,16 +105,3 @@ func TestMsg(t *testing.T) {
 	assert.EqualValues(t, msg, msgs[0])
 	assert.Nil(t, err2, "get message error")
 }
-
-func TestUserStatus(t *testing.T) {
-
-	userID := 1
-	status := PEER_BUSY
-
-	err := saveUserStatus(userID, status)
-	assert.Nil(t, err, "set user status err")
-
-	status1, err1 := getPeerStatus(userID)
-	assert.Nil(t, err1, "get user status err")
-	assert.EqualValues(t, status, status1)
-}
