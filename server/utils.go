@@ -1,13 +1,12 @@
 package main
 
 import (
-	//	"io"
-	//	"encoding/base64"
 	"math/rand"
 	"sync"
 	"time"
-"path/filepath"
-"os"
+	//"os"
+	//"path/filepath"
+	"github.com/kardianos/osext"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -47,6 +46,8 @@ func GUID(n int) string {
 }
 
 func binDir() string {
-	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+
+	//dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	dir, _ := osext.ExecutableFolder()
 	return dir
 }

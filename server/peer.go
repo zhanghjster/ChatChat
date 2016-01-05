@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"sync/atomic"
 	"github.com/gorilla/websocket"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -27,7 +27,7 @@ type Peer struct {
 	ccUpdateChan chan *CurrentChannel
 
 	username string
-	Status   string
+	status string
 
 	cc *CurrentChannel
 }
@@ -67,6 +67,7 @@ func NewPeer(ws *websocket.Conn, id int, username string) (*Peer, error) {
 		ccUpdateChan: make(chan *CurrentChannel),
 
 		username: username,
+		status: PEER_AVAILABLE,
 	}
 
 	// get current channel
@@ -218,7 +219,7 @@ func (p *Peer) processMessage(message *Message) error {
 			return err
 		}
 	case TypeStatusUpdate:
-		message.Content = p.Status
+		message.Content = p.status
 	case TypePeerJoin, TypePeerLeave:
 		message.Username = p.username
 		message.Time = time.Now().Format(TIME_LAYOUT)
@@ -259,7 +260,7 @@ func (p *Peer) sayHi(roomID int) {
 	message := &Message{
 		Action:  TypeStatusUpdate,
 		RoomID:  roomID,
-		Content: p.Status,
+		Content: p.status,
 	}
 	p.processMessage(message)
 }
@@ -273,7 +274,14 @@ func (p *Peer) sayBye(roomID int) {
 	p.processMessage(message)
 }
 
-func (p *Peer) setStatus(status string) error {
-	p.Status = status
-	return saveUserStatus(p.ID, status)
+func (p *Peer) setStatus(status string) {
+	p.status = status
+}
+
+func getPeerStatus(userID int) (string, error) {
+	if peer, ok := peers.get(userID); ok {
+		return peer.status, nil
+	}
+
+	return PEER_UNAVAILABLE, nil
 }

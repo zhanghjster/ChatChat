@@ -6,19 +6,17 @@ BUILD_DIR=$(BUILD_ROOT)/chatchat
 
 build:
 
-	@export GOOS=${GOOS}
-	@export GOARCH=${GOARCH}
-
 	@rm -fr $(BUILD_ROOT)
 
 	@echo build server
 	@mkdir -p $(BUILD_DIR)/bin
-	@cd server && go build -o ../$(BUILD_DIR)/bin/cc
+	@cd server && GOOS=${GOOS} GOARCH=${GOARCH} go build -o ../$(BUILD_DIR)/bin/cc
 
 	@echo build client
 	@mkdir -p $(BUILD_DIR)/web
 	@cp -fr web/templates $(BUILD_DIR)/web/
 	@mkdir -p $(BUILD_DIR)/web/static/js
+	@rm -f $(BUILD_DIR)/web/static/js/*.js
 	@cd web/react && npm run build_pro
 	@cp -fr web/static $(BUILD_DIR)/web/
 
@@ -55,6 +53,8 @@ dev: dbdata
 
 	cd web/react/ && npm run watch
 
+docker: GOOS=linux
+docker: GOARCH=amd64
 docker: build
 	
 	mv build/chatchat.tar.gz docker/pro/

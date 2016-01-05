@@ -18,8 +18,9 @@ import {
 import { checkHttpStatus, parseJSON, roomData, arrayContains } from '../utils';
 import history from '../utils/history.js';
 
-var API_BASE = "http://dockerhost:3001/api/v1";
-var WS_BASE  = "ws://dockerhost:3001/api/v1/start_chat";
+var HOST_PORT = document.location.hostname + ":" + document.location.port;
+var API_BASE = "http://" + HOST_PORT + "/api/v1";
+var WS_BASE  = "ws://" + HOST_PORT + "/api/v1/start_chat";
 
 let WS = null;
 

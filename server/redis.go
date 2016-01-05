@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"time"
-	"github.com/go/src/fmt"
 )
 
 const (
